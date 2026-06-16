@@ -24,6 +24,7 @@ export default function App() {
   const [profileNewPassword, setProfileNewPassword] = useState('');
   const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
   const [profileSaving, setProfileSaving] = useState(false);
+  const [congratulations, setCongratulations] = useState(null);
 
   // Check auth status
   const checkAuth = async () => {
@@ -54,6 +55,7 @@ export default function App() {
       if (matchesRes.ok) {
         const matchesData = await matchesRes.json();
         setMatches(matchesData.matches || []);
+        setCongratulations(matchesData.congratulations || null);
       }
 
       // Fetch leaderboard to compute pool balance and current user balance
@@ -367,6 +369,77 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {activeTab === 'matches' && congratulations && (
+            <div className="glass-panel relative border border-amber-500/20 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 p-4 sm:p-5 overflow-hidden rounded-2xl animate-fade-in shadow-lg mb-6">
+              {/* Soft gold glow */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.04)_0%,transparent_70%)] pointer-events-none" />
+              
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between relative z-10">
+                <div className="text-center md:text-left flex-grow">
+                  <h3 className="text-sm font-extrabold tracking-wider text-amber-400 flex items-center justify-center md:justify-start gap-1.5 uppercase">
+                    🏆 Bảng Vàng Tiên Tri (Ngày {congratulations.recentDate})
+                  </h3>
+                  <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
+                    Chúc mừng anh em đã dự đoán chính xác kết quả các trận đấu gần nhất:{" "}
+                    <span className="text-gray-300 font-semibold">
+                      {congratulations.matches.map(m => `${m.teamHome} ${m.scoreHome}-${m.scoreAway} ${m.teamAway}`).join(', ')}
+                    </span>
+                  </p>
+                  
+                  {/* Winners list */}
+                  <div className="mt-3 space-y-2">
+                    {congratulations.exactWinners.length > 0 && (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 text-xs">
+                        <span className="font-bold text-amber-300 flex items-center gap-1 min-w-[90px] shrink-0">
+                          👑 Vua Tiên Tri:
+                        </span>
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-1.5">
+                          {congratulations.exactWinners.map((w, idx) => (
+                            <span 
+                              key={idx} 
+                              className="px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 font-medium font-mono text-[11px]"
+                              title={`Đoán đúng tỷ số ${w.predictionText} trận ${w.matchName}`}
+                            >
+                              @{w.username} ({w.displayName})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {congratulations.outcomeWinners.length > 0 && (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 text-xs">
+                        <span className="font-bold text-emerald-400 flex items-center gap-1 min-w-[90px] shrink-0">
+                          ⭐ Thần Đoán:
+                        </span>
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-1.5">
+                          {congratulations.outcomeWinners.map((w, idx) => (
+                            <span 
+                              key={idx} 
+                              className="px-2 py-0.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-emerald-300 text-[11px]"
+                              title={`Đoán đúng kết quả trận ${w.matchName}`}
+                            >
+                              @{w.username} ({w.displayName})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {congratulations.exactWinners.length === 0 && congratulations.outcomeWinners.length === 0 && (
+                      <p className="text-[11px] text-gray-500 italic">Hôm đó không có ai đoán trúng kết quả trận nào.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Decorative trophy icon */}
+                <div className="hidden md:flex w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 items-center justify-center text-xl text-amber-400 shrink-0 shadow-inner">
+                  👑
+                </div>
+              </div>
+            </div>
+          )}
 
           {activeTab === 'matches' && (
             <MatchList 

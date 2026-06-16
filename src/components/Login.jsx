@@ -136,10 +136,10 @@ export default function Login({ onLoginSuccess }) {
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
 
       {/* Split presentation grid */}
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center z-10 animate-fade-in">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center z-10 animate-fade-in px-2 sm:px-4">
         
         {/* LEFT: Branding Visual Presentation */}
-        <div className="md:col-span-6 flex flex-col justify-center items-center text-center p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden w-full max-w-md mx-auto">
+        <div className="hidden md:flex md:col-span-6 flex-col justify-center items-center text-center p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden w-full max-w-md mx-auto">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,136,0.06)_0%,transparent_70%)] pointer-events-none" />
           
           <div className="w-full max-w-sm bg-white/95 p-4 md:p-5 rounded-2xl shadow-inner border border-white/20 mb-6 flex justify-center items-center relative z-10">
@@ -177,7 +177,23 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         {/* RIGHT: Login/Register Credentials Card */}
-        <div className="md:col-span-6 glass-panel p-6 md:p-8 w-full max-w-md mx-auto">
+        <div className="md:col-span-6 glass-panel p-6 md:p-8 w-full max-w-md mx-auto rounded-3xl border border-white/10 shadow-2xl">
+          
+          {/* Mobile-only logo header */}
+          <div className="flex md:hidden flex-col items-center text-center mb-6 border-b border-white/5 pb-4">
+            <div className="bg-white/95 p-3 rounded-2xl shadow-inner border border-white/20 mb-3 w-16 h-16 flex items-center justify-center">
+              <img 
+                src="/worldcup2026_logo.jpg" 
+                alt="World Cup 2026 Logo" 
+                className="max-h-12 object-contain" 
+              />
+            </div>
+            <h1 className="text-xl font-extrabold tracking-tight glow-text text-green uppercase leading-none">
+              WORLD CUP 2026
+            </h1>
+            <p className="text-[10px] text-gray-400 font-bold tracking-widest mt-1">DỰ ĐOÁN FOR FUN</p>
+          </div>
+
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white mb-1">
               {isRegister ? 'Tạo Tài Khoản' : 'Đăng Nhập'}

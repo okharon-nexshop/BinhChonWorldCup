@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { readDB, writeDB } from './db.js';
+import { readDB, writeDB, getCongratulationsData } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -291,7 +291,9 @@ app.get('/api/matches', authenticate, async (req, res) => {
       };
     });
 
-    res.json({ matches: matchesWithPredictions });
+    const congratulations = getCongratulationsData(db);
+
+    res.json({ matches: matchesWithPredictions, congratulations });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ' });

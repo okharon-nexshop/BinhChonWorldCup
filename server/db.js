@@ -224,9 +224,19 @@ export async function readDB() {
         return JSON.parse(JSON.stringify(migratedDB));
       }
       const { _id, ...rest } = doc;
-      const { db: migratedDB, needsMigration } = migrateDatabase(rest);
-      if (needsMigration) {
-        console.log('Migrating TBD matches in MongoDB...');
+      let { db: migratedDB, needsMigration } = migrateDatabase(rest);
+      
+      let updatedScores = false;
+      try {
+        const autoResult = await autoUpdateScores(migratedDB);
+        migratedDB = autoResult.db;
+        updatedScores = autoResult.updated;
+      } catch (err) {
+        console.error('Auto update score error in MongoDB:', err);
+      }
+
+      if (needsMigration || updatedScores) {
+        console.log('Writing updated db state to MongoDB...');
         await writeDB(migratedDB);
       }
       return migratedDB;
@@ -249,9 +259,19 @@ export async function readDB() {
     }
     const data = await fs.promises.readFile(DB_PATH, 'utf8');
     const parsed = JSON.parse(data);
-    const { db: migratedDB, needsMigration } = migrateDatabase(parsed);
-    if (needsMigration) {
-      console.log('Migrating TBD matches in local JSON...');
+    let { db: migratedDB, needsMigration } = migrateDatabase(parsed);
+    
+    let updatedScores = false;
+    try {
+      const autoResult = await autoUpdateScores(migratedDB);
+      migratedDB = autoResult.db;
+      updatedScores = autoResult.updated;
+    } catch (err) {
+      console.error('Auto update score error in local JSON:', err);
+    }
+
+    if (needsMigration || updatedScores) {
+      console.log('Writing updated db state to local JSON...');
       await writeDB(migratedDB);
     }
     return migratedDB;
@@ -264,24 +284,22 @@ export async function readDB() {
 
 export async function writeDB(data) {
   if (MONGODB_URI) {
-    writeQueue = writeQueue.then(async () => {
-      try {
-        const collection = await getMongoCollection();
-        await collection.replaceOne(
-          { _id: 'state_document' },
-          { _id: 'state_document', ...data },
-          { upsert: true }
-        );
-      } catch (error) {
-        console.error('Error writing database to MongoDB Atlas:', error);
-        throw error;
-      }
-    });
-    return writeQueue;
+    try {
+      const collection = await getMongoCollection();
+      await collection.replaceOne(
+        { _id: 'state_document' },
+        { _id: 'state_document', ...data },
+        { upsert: true }
+      );
+    } catch (error) {
+      console.error('Error writing database to MongoDB Atlas:', error);
+      throw error;
+    }
+    return;
   }
 
   // Local fallback
-  writeQueue = writeQueue.then(async () => {
+  writeQueue = writeQueue.catch(() => {}).then(async () => {
     try {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -293,4 +311,185 @@ export async function writeDB(data) {
     }
   });
   return writeQueue;
+}
+
+// --- AUTO SCORE UPDATES & CONGRATULATIONS LAYER ---
+
+const teamTranslation = {
+  "Mexico": "Mexico",
+  "South Africa": "Nam Phi",
+  "South Korea": "Hàn Quốc",
+  "Czech Republic": "Cộng hòa Séc",
+  "Czechia": "Cộng hòa Séc",
+  "Canada": "Canada",
+  "Bosnia & Herzegovina": "Bosnia",
+  "Bosnia": "Bosnia",
+  "Qatar": "Qatar",
+  "Switzerland": "Thụy Sĩ",
+  "Brazil": "Brazil",
+  "Morocco": "Morocco",
+  "Haiti": "Haiti",
+  "Scotland": "Scotland",
+  "United States": "Mỹ",
+  "USA": "Mỹ",
+  "Paraguay": "Paraguay",
+  "Australia": "Úc",
+  "Turkey": "Thổ Nhĩ Kỳ",
+  "Germany": "Đức",
+  "Curaçao": "Curaçao",
+  "Curacao": "Curaçao",
+  "Ivory Coast": "Bờ Biển Ngà",
+  "Ecuador": "Ecuador",
+  "Netherlands": "Hà Lan",
+  "Japan": "Nhật Bản",
+  "Sweden": "Thụy Điển",
+  "Tunisia": "Tunisia",
+  "Belgium": "Bỉ",
+  "Egypt": "Ai Cập",
+  "Iran": "Iran",
+  "New Zealand": "New Zealand",
+  "Spain": "Tây Ban Nha",
+  "Cape Verde": "Cape Verde",
+  "Saudi Arabia": "Ả Rập Xê Út",
+  "Uruguay": "Uruguay",
+  "France": "Pháp",
+  "Senegal": "Senegal",
+  "Iraq": "Iraq",
+  "Norway": "Na Uy",
+  "Argentina": "Argentina",
+  "Algeria": "Algeria",
+  "Austria": "Áo",
+  "Jordan": "Jordan",
+  "Portugal": "Bồ Đào Nha",
+  "DR Congo": "CHDC Congo",
+  "Congo DR": "CHDC Congo",
+  "CHDC Congo": "CHDC Congo",
+  "Uzbekistan": "Uzbekistan",
+  "Colombia": "Colombia",
+  "England": "Anh",
+  "Croatia": "Croatia",
+  "Ghana": "Ghana",
+  "Panama": "Panama"
+};
+
+export async function autoUpdateScores(db) {
+  if (!db.settings) {
+    db.settings = {};
+  }
+  
+  // Today's date in GMT+7
+  const todayGMT7 = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0];
+  
+  if (db.settings.lastAutoUpdate === todayGMT7) {
+    return { db, updated: false };
+  }
+  
+  console.log(`Checking for automatic match score updates for ${todayGMT7}...`);
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json();
+    if (!data || !Array.isArray(data.matches)) {
+      throw new Error('Invalid JSON format from openfootball');
+    }
+    
+    let updatedCount = 0;
+    
+    for (const item of data.matches) {
+      if (item.score && Array.isArray(item.score.ft)) {
+        const homeEng = item.team1;
+        const awayEng = item.team2;
+        
+        const homeViet = teamTranslation[homeEng];
+        const awayViet = teamTranslation[awayEng];
+        
+        if (homeViet && awayViet) {
+          const matchIdx = db.matches.findIndex(m => m.teamHome === homeViet && m.teamAway === awayViet);
+          if (matchIdx !== -1) {
+            const m = db.matches[matchIdx];
+            const scoreHome = item.score.ft[0];
+            const scoreAway = item.score.ft[1];
+            
+            if (m.scoreHome === null || m.scoreAway === null || m.scoreHome !== scoreHome || m.scoreAway !== scoreAway) {
+              db.matches[matchIdx].scoreHome = scoreHome;
+              db.matches[matchIdx].scoreAway = scoreAway;
+              updatedCount++;
+            }
+          }
+        }
+      }
+    }
+    
+    db.settings.lastAutoUpdate = todayGMT7;
+    console.log(`Automatic score updates completed. Updated ${updatedCount} matches.`);
+    return { db, updated: updatedCount > 0 };
+  } catch (err) {
+    console.error('Failed to run automatic score updates:', err);
+    return { db, updated: false };
+  }
+}
+
+export function getCongratulationsData(db) {
+  if (!db || !Array.isArray(db.matches) || !Array.isArray(db.predictions) || !Array.isArray(db.users)) {
+    return null;
+  }
+  const finished = db.matches.filter(m => m.scoreHome !== null && m.scoreAway !== null);
+  if (finished.length === 0) return null;
+
+  // Find the most recent date of finished matches
+  const sortedFinished = [...finished].sort((a, b) => b.datetime.localeCompare(a.datetime));
+  const recentDate = sortedFinished[0].date;
+  const recentMatches = finished.filter(m => m.date === recentDate);
+
+  const exactWinners = [];
+  const outcomeWinners = [];
+
+  recentMatches.forEach(m => {
+    const actualOutcome = m.scoreHome > m.scoreAway ? 'home' : (m.scoreHome === m.scoreAway ? 'draw' : 'away');
+    const preds = db.predictions.filter(p => p.matchId === m.id);
+
+    preds.forEach(p => {
+      const user = db.users.find(u => u.id === p.userId);
+      if (!user) return;
+
+      const isExact = p.predictHome === m.scoreHome && p.predictAway === m.scoreAway;
+      const predOutcome = p.predictHome > p.predictAway ? 'home' : (p.predictHome === p.predictAway ? 'draw' : 'away');
+      const isOutcomeCorrect = predOutcome === actualOutcome;
+
+      const matchName = `${m.teamHome} ${m.scoreHome}-${m.scoreAway} ${m.teamAway}`;
+
+      if (isExact) {
+        exactWinners.push({
+          userId: user.id,
+          displayName: user.displayName,
+          username: user.username,
+          matchName,
+          predictionText: `${p.predictHome}-${p.predictAway}`
+        });
+      } else if (isOutcomeCorrect) {
+        outcomeWinners.push({
+          userId: user.id,
+          displayName: user.displayName,
+          username: user.username,
+          matchName,
+          predictionText: `${p.predictHome}-${p.predictAway}`
+        });
+      }
+    });
+  });
+
+  return {
+    recentDate,
+    matches: recentMatches.map(m => ({
+      id: m.id,
+      teamHome: m.teamHome,
+      teamAway: m.teamAway,
+      scoreHome: m.scoreHome,
+      scoreAway: m.scoreAway
+    })),
+    exactWinners,
+    outcomeWinners
+  };
 }

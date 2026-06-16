@@ -196,6 +196,12 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-body);
   outline: none;
   transition: all 0.2s ease;
+  font-size: 16px; /* Prevents auto-zoom on mobile iOS browsers */
+}
+
+/* Button active tap feedback */
+.btn:active {
+  transform: scale(0.97);
 }
 
 .form-input:focus {

@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import path from 'url';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { readDB, writeDB } from '../server/db.js';
+import { readDB, writeDB, getCongratulationsData } from '../server/db.js';
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'worldcup2026-super-secret-key-change-in-prod';
@@ -282,7 +282,9 @@ app.get('/api/matches', authenticate, async (req, res) => {
       };
     });
 
-    res.json({ matches: matchesWithPredictions });
+    const congratulations = getCongratulationsData(db);
+
+    res.json({ matches: matchesWithPredictions, congratulations });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ' });
