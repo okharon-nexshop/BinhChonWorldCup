@@ -163,13 +163,15 @@ export default function AdminPanel() {
         body: JSON.stringify({ 
           displayName: userDisplayNameInput, 
           role: userRoleInput,
-          username: userUsernameInput
+          username: userUsernameInput,
+          password: userPasswordInput
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       
       showMsg('Cập nhật thông tin thành viên thành công!');
+      setUserPasswordInput('');
       setEditingUserId(null);
       fetchData();
     } catch (err) {

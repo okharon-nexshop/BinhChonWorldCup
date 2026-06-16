@@ -540,7 +540,7 @@ app.post('/api/admin/invite-code', authenticate, requireAdmin, async (req, res) 
 
 app.put('/api/admin/users/:userId', authenticate, requireAdmin, async (req, res) => {
   const targetId = req.params.userId;
-  const { displayName, role, username } = req.body;
+  const { displayName, role, username, password } = req.body;
 
   try {
     const db = await readDB();
@@ -564,6 +564,14 @@ app.put('/api/admin/users/:userId', authenticate, requireAdmin, async (req, res)
 
     if (displayName) db.users[userIdx].displayName = displayName.trim();
     if (role) db.users[userIdx].role = role;
+
+    if (password && password.trim() !== '') {
+      if (password.length < 6) {
+        return res.status(400).json({ message: 'Mật khẩu phải từ 6 ký tự trở lên' });
+      }
+      const salt = await bcrypt.genSalt(10);
+      db.users[userIdx].passwordHash = await bcrypt.hash(password, salt);
+    }
 
     await writeDB(db);
     const { passwordHash, ...userWithoutPassword } = db.users[userIdx];
