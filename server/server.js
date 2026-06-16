@@ -161,6 +161,97 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ message: 'Đăng xuất thành công' });
 });
 
+// Google Authentication Configuration
+app.get('/api/auth/google/config', (req, res) => {
+  res.json({ clientId: process.env.GOOGLE_CLIENT_ID || '' });
+});
+
+// Google Login
+app.post('/api/auth/google/login', async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) {
+    return res.status(400).json({ message: 'Thiếu mã xác thực Google' });
+  }
+
+  try {
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!response.ok) {
+      return res.status(400).json({ message: 'Xác thực tài khoản Google thất bại' });
+    }
+    const payload = await response.json();
+    const { sub: googleId, email, name } = payload;
+
+    const db = await readDB();
+    let user = db.users.find(u => u.googleId === googleId || u.username.toLowerCase() === email.toLowerCase());
+
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await writeDB(db);
+      }
+      const token = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+      const { passwordHash, ...userWithoutPassword } = user;
+      return res.json({ message: 'Đăng nhập thành công', user: userWithoutPassword });
+    } else {
+      return res.json({ status: 'needs_invite', googleId, email, name });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
+
+// Google Registration (Confirm Invite Code)
+app.post('/api/auth/google/register', async (req, res) => {
+  const { inviteCode, googleId, email, name } = req.body;
+  if (!inviteCode || !googleId || !email || !name) {
+    return res.status(400).json({ message: 'Thông tin đăng ký Google không hợp lệ' });
+  }
+
+  try {
+    const db = await readDB();
+    if (inviteCode !== db.settings.inviteCode) {
+      return res.status(400).json({ message: 'Mã mời tham gia nhóm không chính xác' });
+    }
+
+    const userExists = db.users.find(u => u.googleId === googleId || u.username.toLowerCase() === email.toLowerCase());
+    if (userExists) {
+      return res.status(400).json({ message: 'Tài khoản đã tồn tại' });
+    }
+
+    const newUser = {
+      id: `user_${Date.now()}`,
+      username: email.toLowerCase().trim(),
+      displayName: name.trim(),
+      googleId,
+      role: 'user',
+      createdAt: new Date().toISOString()
+    };
+
+    db.users.push(newUser);
+    await writeDB(db);
+
+    const token = jwt.sign({ userId: newUser.id, username: newUser.username, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.status(201).json({ message: 'Đăng ký tài khoản thành công', user: newUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
+
 // Change password
 app.post('/api/auth/change-password', authenticate, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
