@@ -71,32 +71,32 @@ function MatchNode({ match, onClick, today, tomorrow }) {
       className={`match-node ${borderClass} ${isVoteOpen ? 'is-open-vote' : ''}`}
     >
       {/* Node Header */}
-      <div className="flex justify-between items-center text-[9px] text-gray-500 mb-1.5 border-b border-white/5 pb-1">
+      <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-gray-500 mb-1.5 border-b border-white/5 pb-1">
         <span className="font-bold font-mono text-gray-400">#TRẬN {num}</span>
         <span className="flex items-center gap-1">
-          <Calendar size={8} /> {date} {time}
+          <Calendar size={11} /> {date} {time}
         </span>
       </div>
 
       {/* Team Home */}
       <div className={`match-node-team ${homeWinner ? 'winner' : scoreHome !== null ? 'loser' : ''}`}>
         <div className="match-node-team-info">
-          <span>{getCountryEmoji(teamHome)}</span>
-          <span className="truncate max-w-[120px]">{getFriendlyTeamName(teamHome)}</span>
+          <span className="text-sm sm:text-base">{getCountryEmoji(teamHome)}</span>
+          <span className="truncate max-w-[140px] font-semibold text-xs sm:text-sm">{getFriendlyTeamName(teamHome)}</span>
         </div>
-        <span className="match-node-score">
-          {scoreHome !== null ? scoreHome : (prediction ? <span className="text-[10px] text-emerald-500 font-mono">({prediction.predictHome})</span> : '-')}
+        <span className="match-node-score font-bold font-mono text-xs sm:text-sm">
+          {scoreHome !== null ? scoreHome : (prediction ? <span className="text-[10px] sm:text-xs text-emerald-500 font-mono">({prediction.predictHome})</span> : '-')}
         </span>
       </div>
 
       {/* Team Away */}
       <div className={`match-node-team ${awayWinner ? 'winner' : scoreAway !== null ? 'loser' : ''}`}>
         <div className="match-node-team-info">
-          <span>{getCountryEmoji(teamAway)}</span>
-          <span className="truncate max-w-[120px]">{getFriendlyTeamName(teamAway)}</span>
+          <span className="text-sm sm:text-base">{getCountryEmoji(teamAway)}</span>
+          <span className="truncate max-w-[140px] font-semibold text-xs sm:text-sm">{getFriendlyTeamName(teamAway)}</span>
         </div>
-        <span className="match-node-score">
-          {scoreAway !== null ? scoreAway : (prediction ? <span className="text-[10px] text-emerald-500 font-mono">({prediction.predictAway})</span> : '-')}
+        <span className="match-node-score font-bold font-mono text-xs sm:text-sm">
+          {scoreAway !== null ? scoreAway : (prediction ? <span className="text-[10px] sm:text-xs text-emerald-500 font-mono">({prediction.predictAway})</span> : '-')}
         </span>
       </div>
 
@@ -344,121 +344,97 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
       </div>
 
       {bracketMode === 'group' ? (
-        /* GROUP STAGE VIEW */
-        <div className="space-y-6 animate-[fadeIn_0.3s_ease]">
-          {/* Group Tab Bar */}
-          <div className="flex overflow-x-auto gap-1.5 pb-2 scrollbar-premium">
-            {groupsList.map(g => (
-              <button
-                key={g}
-                type="button"
-                className={`px-3.5 py-1.5 text-[11px] font-bold rounded-lg border transition-all whitespace-nowrap ${
-                  selectedGroup === g
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                    : 'bg-white/5 border-white/5 text-gray-400 hover:text-white'
-                }`}
-                onClick={() => setSelectedGroup(g)}
+        /* GROUP STAGE VIEW - Renders all 12 groups in a responsive grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-[fadeIn_0.3s_ease]">
+          {groupsList.map(gName => {
+            const groupMatches = matches.filter(m => m.group === gName);
+            const groupStandings = getGroupStandings(groupMatches);
+
+            return (
+              <div 
+                key={gName} 
+                className="glass-panel border border-white/5 p-4 rounded-2xl bg-[#08130e]/40 flex flex-col justify-between space-y-4"
               >
-                {g}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Standings Table */}
-            <div className="lg:col-span-5">
-              <div className="glass-panel border border-white/5 p-4 rounded-2xl bg-[#08130e]/40 space-y-3">
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                    📊 Bảng Xếp Hạng - {selectedGroup}
-                  </h3>
-                  <span className="text-[9px] text-gray-500 italic">Thực tế</span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-white/10 text-gray-400 font-mono font-bold uppercase tracking-wider text-[9px]">
-                        <th className="py-2 px-1 text-center w-8">#</th>
-                        <th className="py-2 px-1">Đội</th>
-                        <th className="py-2 px-1 text-center w-8" title="Số trận đã đấu">Tr</th>
-                        <th className="py-2 px-1 text-center w-6" title="Thắng">T</th>
-                        <th className="py-2 px-1 text-center w-6" title="Hòa">H</th>
-                        <th className="py-2 px-1 text-center w-6" title="Thua">B</th>
-                        <th className="py-2 px-1 text-center w-8" title="Hiệu số">HS</th>
-                        <th className="py-2 px-1 text-center w-10 text-emerald-400" title="Điểm">Điểm</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activeGroupStandings.map((team, idx) => {
-                        let rowBg = 'border-white/5';
-                        let rankBg = 'bg-white/5 text-gray-400';
-                        if (idx < 2) {
-                          rowBg = 'border-emerald-500/10 bg-emerald-500/2';
-                          rankBg = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-                        } else if (idx === 2) {
-                          rowBg = 'border-blue-500/10 bg-blue-500/2';
-                          rankBg = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-                        } else {
-                          rowBg = 'border-red-500/5 opacity-70';
-                          rankBg = 'bg-red-500/10 text-red-400 border border-red-500/20';
-                        }
-
-                        return (
-                          <tr key={team.name} className={`border-b ${rowBg} hover:bg-white/5 transition-colors`}>
-                            <td className="py-2.5 px-1 text-center font-bold font-mono">
-                              <span className={`w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] ${rankBg}`}>
-                                {idx + 1}
-                              </span>
-                            </td>
-                            <td className="py-2.5 px-1 font-semibold text-white flex items-center gap-1 whitespace-nowrap">
-                              <span className="text-sm">{getCountryEmoji(team.name)}</span>
-                              <span className="truncate max-w-[100px]">{team.name}</span>
-                            </td>
-                            <td className="py-2.5 px-1 text-center font-bold font-mono text-gray-300">{team.played}</td>
-                            <td className="py-2.5 px-1 text-center font-semibold font-mono text-gray-500">{team.win}</td>
-                            <td className="py-2.5 px-1 text-center font-semibold font-mono text-gray-500">{team.draw}</td>
-                            <td className="py-2.5 px-1 text-center font-semibold font-mono text-gray-500">{team.loss}</td>
-                            <td className={`py-2.5 px-1 text-center font-bold font-mono ${team.gd > 0 ? 'text-emerald-400' : team.gd < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                              {team.gd > 0 ? `+${team.gd}` : team.gd}
-                            </td>
-                            <td className="py-2.5 px-1 text-center font-black font-mono text-emerald-400 text-xs">{team.pts}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex flex-col gap-1 text-[9px] text-gray-500 border-t border-white/5 pt-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded bg-emerald-500/20 border border-emerald-500/30 inline-block" />
-                    <span>Top 2: Vé vào thẳng Vòng 32</span>
+                <div>
+                  {/* Group Header */}
+                  <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-3">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      📊 {gName}
+                    </h3>
+                    <span className="text-[9px] text-gray-500 italic">Bảng xếp hạng</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded bg-blue-500/20 border border-blue-500/30 inline-block" />
-                    <span>Hạng 3: Xét 8 đội tốt nhất trong 12 bảng</span>
+
+                  {/* Standings Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-white/10 text-gray-400 font-mono font-bold uppercase tracking-wider text-[10px] sm:text-xs">
+                          <th className="py-2.5 px-1.5 text-center w-6 sm:w-8">#</th>
+                          <th className="py-2.5 px-1.5">Đội</th>
+                          <th className="py-2.5 px-1.5 text-center w-8 sm:w-10" title="Số trận đã đấu">Tr</th>
+                          <th className="py-2.5 px-1.5 text-center w-8 sm:w-10" title="Hiệu số">HS</th>
+                          <th className="py-2.5 px-1.5 text-center w-10 sm:w-12 text-emerald-400" title="Điểm">Đ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-xs sm:text-sm">
+                        {groupStandings.map((team, idx) => {
+                          let rowBg = 'border-white/5';
+                          let rankBg = 'bg-white/5 text-gray-400';
+                          if (idx < 2) {
+                            rowBg = 'border-emerald-500/10 bg-emerald-500/2';
+                            rankBg = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                          } else if (idx === 2) {
+                            rowBg = 'border-blue-500/10 bg-blue-500/2';
+                            rankBg = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+                          } else {
+                            rowBg = 'border-red-500/5 opacity-70';
+                            rankBg = 'bg-red-500/10 text-red-400 border border-red-500/20';
+                          }
+
+                          return (
+                            <tr key={team.name} className={`border-b ${rowBg} hover:bg-white/5 transition-colors`}>
+                              <td className="py-2.5 px-1.5 text-center font-bold font-mono">
+                                <span className={`w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] sm:text-[10px] ${rankBg}`}>
+                                  {idx + 1}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-1.5 font-semibold text-white flex items-center gap-1.5 whitespace-nowrap">
+                                <span className="text-sm sm:text-base">{getCountryEmoji(team.name)}</span>
+                                <span className="truncate max-w-[85px] sm:max-w-[120px]">{team.name}</span>
+                              </td>
+                              <td className="py-2.5 px-1.5 text-center font-bold font-mono text-gray-300">{team.played}</td>
+                              <td className={`py-2.5 px-1.5 text-center font-bold font-mono ${team.gd > 0 ? 'text-emerald-400' : team.gd < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                {team.gd > 0 ? `+${team.gd}` : team.gd}
+                              </td>
+                              <td className="py-2.5 px-1.5 text-center font-black font-mono text-emerald-400 text-xs sm:text-sm">{team.pts}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Group Matches */}
+                <div className="border-t border-white/5 pt-3">
+                  <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-2 pl-1">
+                    ⚽ Trận Đấu & Bình Chọn
+                  </h4>
+                  <div className="flex flex-col gap-2 group-stage-matches">
+                    {groupMatches.map(m => (
+                      <MatchNode 
+                        key={m.id} 
+                        match={m} 
+                        onClick={handleNodeClick} 
+                        today={today} 
+                        tomorrow={tomorrow} 
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Group Matches */}
-            <div className="lg:col-span-7 space-y-3">
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-400 pl-2">
-                ⚽ Lịch Thi Đấu & Bình Chọn ({selectedGroup})
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
-                {activeGroupMatches.map(m => (
-                  <MatchNode 
-                    key={m.id} 
-                    match={m} 
-                    onClick={handleNodeClick} 
-                    today={today} 
-                    tomorrow={tomorrow} 
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       ) : (
         /* KNOCKOUT BRACKET VIEW */
