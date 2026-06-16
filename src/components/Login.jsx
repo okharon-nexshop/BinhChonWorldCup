@@ -189,14 +189,14 @@ export default function Login({ onLoginSuccess }) {
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center z-10 animate-fade-in">
         
         {/* LEFT: Branding Visual Presentation */}
-        <div className="md:col-span-6 flex flex-col justify-center items-center text-center p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+        <div className="md:col-span-6 flex flex-col justify-center items-center text-center p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden w-full max-w-md mx-auto">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,136,0.06)_0%,transparent_70%)] pointer-events-none" />
           
-          <div className="w-full bg-white/95 p-5 rounded-2xl shadow-inner border border-white/20 mb-6 flex justify-center items-center relative z-10">
+          <div className="w-full max-w-sm bg-white/95 p-4 md:p-5 rounded-2xl shadow-inner border border-white/20 mb-6 flex justify-center items-center relative z-10">
             <img 
               src="/worldcup2026_logo.jpg" 
               alt="World Cup 2026 Logo Banner" 
-              className="max-h-32 object-contain" 
+              className="max-h-24 md:max-h-32 max-w-full object-contain" 
             />
           </div>
           
