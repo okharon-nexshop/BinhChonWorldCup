@@ -269,10 +269,9 @@ app.get('/api/temp-debug-users', async (req, res) => {
 
 app.get('/api/temp-debug-collections', async (req, res) => {
   res.json({
-    keys: Object.keys(process.env),
     VERCEL_ENV: process.env.VERCEL_ENV,
     MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
-    MONGODB_URI_VAL: process.env.MONGODB_URI ? (process.env.MONGODB_URI.substring(0, 15) + '...') : null
+    MONGODB_URI_VAL: process.env.MONGODB_URI
   });
 });
 
