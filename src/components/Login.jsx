@@ -6,17 +6,11 @@ export default function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Google Sign-In states
   const [googleClientId, setGoogleClientId] = useState('');
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [googleData, setGoogleData] = useState(null); // stores { googleId, email, name }
-  const [googleInviteCode, setGoogleInviteCode] = useState('');
-  const [googleError, setGoogleError] = useState('');
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Fetch Google client ID configuration
   useEffect(() => {
@@ -90,15 +84,7 @@ export default function Login({ onLoginSuccess }) {
         throw new Error(data.message || 'Xác thực tài khoản Google thất bại');
       }
 
-      if (data.status === 'needs_invite') {
-        // Show invitation code form for registration
-        setGoogleData({
-          googleId: data.googleId,
-          email: data.email,
-          name: data.name
-        });
-        setShowInviteModal(true);
-      } else if (data.user) {
+      if (data.user) {
         onLoginSuccess(data.user);
       }
     } catch (err) {
@@ -108,47 +94,11 @@ export default function Login({ onLoginSuccess }) {
     }
   };
 
-  // Google Invite registration submit
-  const handleGoogleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    setGoogleError('');
-    if (!googleInviteCode) {
-      setGoogleError('Vui lòng nhập mã mời');
-      return;
-    }
-
-    setGoogleLoading(true);
-    try {
-      const res = await fetch('/api/auth/google/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inviteCode: googleInviteCode,
-          googleId: googleData.googleId,
-          email: googleData.email,
-          name: googleData.name
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Đăng ký tài khoản Google thất bại');
-      }
-
-      setShowInviteModal(false);
-      onLoginSuccess(data.user);
-    } catch (err) {
-      setGoogleError(err.message);
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
-    if (!username || !password || (isRegister && (!displayName || !inviteCode))) {
+    if (!username || !password || (isRegister && !displayName)) {
       setError('Vui lòng nhập đầy đủ các trường thông tin');
       return;
     }
@@ -156,7 +106,7 @@ export default function Login({ onLoginSuccess }) {
     setLoading(true);
     const url = isRegister ? '/api/auth/register' : '/api/auth/login';
     const body = isRegister 
-      ? { username, password, displayName, inviteCode }
+      ? { username, password, displayName }
       : { username, password };
 
     try {
@@ -305,29 +255,7 @@ export default function Login({ onLoginSuccess }) {
               </div>
             </div>
 
-            {isRegister && (
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-                  Mã mời tham gia nhóm
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-3.5 text-gray-500">
-                    🔒
-                  </span>
-                  <input
-                    type="text"
-                    className="form-input w-full pl-10"
-                    placeholder="Nhập mã mời từ ban tổ chức"
-                    value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value)}
-                    required
-                  />
-                </div>
-                <p className="text-[11px] text-gray-500 mt-1.5">
-                  Mã này được chia sẻ trong nhóm Zalo của anh em.
-                </p>
-              </div>
-            )}
+
 
             <button
               type="submit"
@@ -378,67 +306,7 @@ export default function Login({ onLoginSuccess }) {
 
       </div>
 
-      {/* Google Sign-In invitation verification Modal */}
-      {showInviteModal && (
-        <div className="modal-backdrop">
-          <div className="w-full max-w-sm glass-panel p-6 shadow-2xl relative animate-fade-in" style={{ background: 'rgba(5, 14, 9, 0.96)' }}>
-            <h4 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-              🔑 Xác Nhận Mã Mời
-            </h4>
-            <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-              Tài khoản Google <span className="text-emerald-400 font-semibold">{googleData?.email}</span> chưa đăng ký tham gia nhóm. Hãy nhập mã mời từ ban tổ chức để hoàn tất tạo tài khoản.
-            </p>
-            
-            {googleError && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
-                ⚠️ {googleError}
-              </div>
-            )}
-            
-            <form onSubmit={handleGoogleRegisterSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-                  Mã mời tham gia nhóm
-                </label>
-                <input
-                  type="text"
-                  className="form-input w-full"
-                  placeholder="Nhập mã mời từ ban tổ chức"
-                  value={googleInviteCode}
-                  onChange={(e) => setGoogleInviteCode(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  className="btn btn-secondary flex-1 py-2"
-                  onClick={() => {
-                    setShowInviteModal(false);
-                    setGoogleInviteCode('');
-                    setGoogleError('');
-                  }}
-                  disabled={googleLoading}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary flex-1 py-2"
-                  disabled={googleLoading}
-                >
-                  {googleLoading ? (
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
-                  ) : (
-                    'Đăng ký'
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
 
     </div>
   );

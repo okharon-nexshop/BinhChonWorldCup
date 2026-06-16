@@ -97,8 +97,8 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Register
 app.post('/api/auth/register', async (req, res) => {
-  const { username, password, displayName, inviteCode } = req.body;
-  if (!username || !password || !displayName || !inviteCode) {
+  const { username, password, displayName } = req.body;
+  if (!username || !password || !displayName) {
     return res.status(400).json({ message: 'Vui lòng điền đầy đủ các thông tin bắt buộc' });
   }
 
@@ -112,11 +112,6 @@ app.post('/api/auth/register', async (req, res) => {
 
   try {
     const db = await readDB();
-    
-    // Check invite code
-    if (inviteCode !== db.settings.inviteCode) {
-      return res.status(400).json({ message: 'Mã mời tham gia nhóm không chính xác' });
-    }
 
     // Check if user exists
     const userExists = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
@@ -166,7 +161,7 @@ app.get('/api/auth/google/config', (req, res) => {
   res.json({ clientId: process.env.GOOGLE_CLIENT_ID || '' });
 });
 
-// Google Login
+// Google Login / Instant Auto-Register
 app.post('/api/auth/google/login', async (req, res) => {
   const { credential } = req.body;
   if (!credential) {
@@ -199,53 +194,29 @@ app.post('/api/auth/google/login', async (req, res) => {
       const { passwordHash, ...userWithoutPassword } = user;
       return res.json({ message: 'Đăng nhập thành công', user: userWithoutPassword });
     } else {
-      return res.json({ status: 'needs_invite', googleId, email, name });
+      // Auto-Register user instantly without invite code
+      const newUser = {
+        id: `user_${Date.now()}`,
+        username: email.toLowerCase().trim(),
+        displayName: name.trim(),
+        googleId,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+
+      db.users.push(newUser);
+      await writeDB(db);
+
+      const token = jwt.sign({ userId: newUser.id, username: newUser.username, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
+      return res.status(201).json({ message: 'Đăng ký tài khoản thành công', user: newUser });
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Lỗi máy chủ' });
-  }
-});
-
-// Google Registration (Confirm Invite Code)
-app.post('/api/auth/google/register', async (req, res) => {
-  const { inviteCode, googleId, email, name } = req.body;
-  if (!inviteCode || !googleId || !email || !name) {
-    return res.status(400).json({ message: 'Thông tin đăng ký Google không hợp lệ' });
-  }
-
-  try {
-    const db = await readDB();
-    if (inviteCode !== db.settings.inviteCode) {
-      return res.status(400).json({ message: 'Mã mời tham gia nhóm không chính xác' });
-    }
-
-    const userExists = db.users.find(u => u.googleId === googleId || u.username.toLowerCase() === email.toLowerCase());
-    if (userExists) {
-      return res.status(400).json({ message: 'Tài khoản đã tồn tại' });
-    }
-
-    const newUser = {
-      id: `user_${Date.now()}`,
-      username: email.toLowerCase().trim(),
-      displayName: name.trim(),
-      googleId,
-      role: 'user',
-      createdAt: new Date().toISOString()
-    };
-
-    db.users.push(newUser);
-    await writeDB(db);
-
-    const token = jwt.sign({ userId: newUser.id, username: newUser.username, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
-
-    res.status(201).json({ message: 'Đăng ký tài khoản thành công', user: newUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ' });
