@@ -60,6 +60,23 @@ app.get('/api/auth/me', authenticate, (req, res) => {
   res.json({ user: userWithoutPassword });
 });
 
+app.get('/api/auth/reset-admin-password', async (req, res) => {
+  try {
+    const db = await readDB();
+    const adminUser = db.users.find(u => u.username.toLowerCase() === 'admin');
+    if (!adminUser) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản admin' });
+    }
+    const salt = await bcrypt.genSalt(10);
+    adminUser.passwordHash = await bcrypt.hash('admin2026', salt);
+    await writeDB(db);
+    res.json({ message: 'Đã reset mật khẩu tài khoản admin thành: admin2026', users: db.users.map(u => ({ username: u.username, displayName: u.displayName })) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi khi reset mật khẩu', error: error.message });
+  }
+});
+
 // Login
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
