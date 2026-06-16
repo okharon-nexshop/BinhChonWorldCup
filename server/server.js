@@ -647,7 +647,7 @@ app.post('/api/admin/matches/:matchId/score', authenticate, requireAdmin, async 
 const distPath = path.join(__dirname, '../dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  app.get('/*splat', (req, res) => {
+  app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 } else {
