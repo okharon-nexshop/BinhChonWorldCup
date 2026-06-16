@@ -145,7 +145,7 @@ let mongoClient = null;
 let dbInstance = null;
 
 async function getMongoCollection() {
-  if (!mongoClient) {
+  if (!mongoClient || !dbInstance) {
     mongoClient = new MongoClient(MONGODB_URI);
     await mongoClient.connect();
     dbInstance = mongoClient.db('binhchonworldcup');
