@@ -268,24 +268,12 @@ app.get('/api/temp-debug-users', async (req, res) => {
 });
 
 app.get('/api/temp-debug-collections', async (req, res) => {
-  try {
-    const { MongoClient } = await import('mongodb');
-    const client = new MongoClient(process.env.MONGODB_URI);
-    await client.connect();
-    const db = client.db('binhchonworldcup');
-    const collections = await db.listCollections().toArray();
-    const items = await db.collection('app_state').find({}).toArray();
-    res.json({
-      collections: collections.map(c => c.name),
-      documents: items.map(doc => ({
-        _id: doc._id,
-        userCount: doc.users ? doc.users.length : 0,
-        users: doc.users ? doc.users.map(u => ({ username: u.username, displayName: u.displayName, hasPassword: !!u.passwordHash, googleId: u.googleId })) : []
-      }))
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json({
+    keys: Object.keys(process.env),
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
+    MONGODB_URI_VAL: process.env.MONGODB_URI ? (process.env.MONGODB_URI.substring(0, 15) + '...') : null
+  });
 });
 
 // --- MATCHES ROUTER ---
