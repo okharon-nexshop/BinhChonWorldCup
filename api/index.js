@@ -249,32 +249,6 @@ app.post('/api/auth/change-password', authenticate, async (req, res) => {
   }
 });
 
-app.get('/api/temp-debug-users', async (req, res) => {
-  try {
-    const db = await readDB();
-    const users = db.users.map(u => ({
-      id: u.id,
-      username: u.username,
-      displayName: u.displayName,
-      role: u.role,
-      hasPassword: !!u.passwordHash,
-      googleId: u.googleId,
-      createdAt: u.createdAt
-    }));
-    res.json({ users });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/temp-debug-collections', async (req, res) => {
-  res.json({
-    VERCEL_ENV: process.env.VERCEL_ENV,
-    MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
-    MONGODB_URI_VAL: process.env.MONGODB_URI
-  });
-});
-
 // --- MATCHES ROUTER ---
 app.get('/api/matches', authenticate, async (req, res) => {
   try {
