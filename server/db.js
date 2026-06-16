@@ -117,6 +117,42 @@ const seededMatches = groupMatches.map((m, idx) => ({
   scoreAway: m.scoreAway !== undefined ? m.scoreAway : null
 }));
 
+// World Cup 2026 Knockout stage matches (73 to 104)
+const knockoutMatches = [
+  { id: "match_73", num: 73, group: "Round of 32", date: "28/06", time: "12:00", datetime: "2026-06-28T12:00:00+07:00", teamHome: "2A", teamAway: "2B", scoreHome: null, scoreAway: null },
+  { id: "match_74", num: 74, group: "Round of 32", date: "29/06", time: "16:30", datetime: "2026-06-29T16:30:00+07:00", teamHome: "1E", teamAway: "3A/B/C/D/F", scoreHome: null, scoreAway: null },
+  { id: "match_75", num: 75, group: "Round of 32", date: "29/06", time: "19:00", datetime: "2026-06-29T19:00:00+07:00", teamHome: "1F", teamAway: "2C", scoreHome: null, scoreAway: null },
+  { id: "match_76", num: 76, group: "Round of 32", date: "29/06", time: "12:00", datetime: "2026-06-29T12:00:00+07:00", teamHome: "1C", teamAway: "2F", scoreHome: null, scoreAway: null },
+  { id: "match_77", num: 77, group: "Round of 32", date: "30/06", time: "17:00", datetime: "2026-06-30T17:00:00+07:00", teamHome: "1I", teamAway: "3C/D/F/G/H", scoreHome: null, scoreAway: null },
+  { id: "match_78", num: 78, group: "Round of 32", date: "30/06", time: "12:00", datetime: "2026-06-30T12:00:00+07:00", teamHome: "2E", teamAway: "2I", scoreHome: null, scoreAway: null },
+  { id: "match_79", num: 79, group: "Round of 32", date: "30/06", time: "19:00", datetime: "2026-06-30T19:00:00+07:00", teamHome: "1A", teamAway: "3C/E/F/H/I", scoreHome: null, scoreAway: null },
+  { id: "match_80", num: 80, group: "Round of 32", date: "01/07", time: "12:00", datetime: "2026-07-01T12:00:00+07:00", teamHome: "1L", teamAway: "3E/H/I/J/K", scoreHome: null, scoreAway: null },
+  { id: "match_81", num: 81, group: "Round of 32", date: "01/07", time: "17:00", datetime: "2026-07-01T17:00:00+07:00", teamHome: "1D", teamAway: "3B/E/F/I/J", scoreHome: null, scoreAway: null },
+  { id: "match_82", num: 82, group: "Round of 32", date: "01/07", time: "13:00", datetime: "2026-07-01T13:00:00+07:00", teamHome: "1G", teamAway: "3A/E/H/I/J", scoreHome: null, scoreAway: null },
+  { id: "match_83", num: 83, group: "Round of 32", date: "02/07", time: "19:00", datetime: "2026-07-02T19:00:00+07:00", teamHome: "2K", teamAway: "2L", scoreHome: null, scoreAway: null },
+  { id: "match_84", num: 84, group: "Round of 32", date: "02/07", time: "12:00", datetime: "2026-07-02T12:00:00+07:00", teamHome: "1H", teamAway: "2J", scoreHome: null, scoreAway: null },
+  { id: "match_85", num: 85, group: "Round of 32", date: "02/07", time: "20:00", datetime: "2026-07-02T20:00:00+07:00", teamHome: "1B", teamAway: "3E/F/G/I/J", scoreHome: null, scoreAway: null },
+  { id: "match_86", num: 86, group: "Round of 32", date: "03/07", time: "18:00", datetime: "2026-07-03T18:00:00+07:00", teamHome: "1J", teamAway: "2H", scoreHome: null, scoreAway: null },
+  { id: "match_87", num: 87, group: "Round of 32", date: "03/07", time: "20:30", datetime: "2026-07-03T20:30:00+07:00", teamHome: "1K", teamAway: "3D/E/I/J/L", scoreHome: null, scoreAway: null },
+  { id: "match_88", num: 88, group: "Round of 32", date: "03/07", time: "13:00", datetime: "2026-07-03T13:00:00+07:00", teamHome: "2D", teamAway: "2G", scoreHome: null, scoreAway: null },
+  { id: "match_89", num: 89, group: "Round of 16", date: "04/07", time: "17:00", datetime: "2026-07-04T17:00:00+07:00", teamHome: "W74", teamAway: "W77", scoreHome: null, scoreAway: null },
+  { id: "match_90", num: 90, group: "Round of 16", date: "04/07", time: "12:00", datetime: "2026-07-04T12:00:00+07:00", teamHome: "W73", teamAway: "W75", scoreHome: null, scoreAway: null },
+  { id: "match_91", num: 91, group: "Round of 16", date: "05/07", time: "16:00", datetime: "2026-07-05T16:00:00+07:00", teamHome: "W76", teamAway: "W78", scoreHome: null, scoreAway: null },
+  { id: "match_92", num: 92, group: "Round of 16", date: "05/07", time: "18:00", datetime: "2026-07-05T18:00:00+07:00", teamHome: "W79", teamAway: "W80", scoreHome: null, scoreAway: null },
+  { id: "match_93", num: 93, group: "Round of 16", date: "06/07", time: "14:00", datetime: "2026-07-06T14:00:00+07:00", teamHome: "W83", teamAway: "W84", scoreHome: null, scoreAway: null },
+  { id: "match_94", num: 94, group: "Round of 16", date: "06/07", time: "17:00", datetime: "2026-07-06T17:00:00+07:00", teamHome: "W81", teamAway: "W82", scoreHome: null, scoreAway: null },
+  { id: "match_95", num: 95, group: "Round of 16", date: "07/07", time: "12:00", datetime: "2026-07-07T12:00:00+07:00", teamHome: "W86", teamAway: "W88", scoreHome: null, scoreAway: null },
+  { id: "match_96", num: 96, group: "Round of 16", date: "07/07", time: "13:00", datetime: "2026-07-07T13:00:00+07:00", teamHome: "W85", teamAway: "W87", scoreHome: null, scoreAway: null },
+  { id: "match_97", num: 97, group: "Quarter-final", date: "09/07", time: "16:00", datetime: "2026-07-09T16:00:00+07:00", teamHome: "W89", teamAway: "W90", scoreHome: null, scoreAway: null },
+  { id: "match_98", num: 98, group: "Quarter-final", date: "10/07", time: "12:00", datetime: "2026-07-10T12:00:00+07:00", teamHome: "W93", teamAway: "W94", scoreHome: null, scoreAway: null },
+  { id: "match_99", num: 99, group: "Quarter-final", date: "11/07", time: "17:00", datetime: "2026-07-11T17:00:00+07:00", teamHome: "W91", teamAway: "W92", scoreHome: null, scoreAway: null },
+  { id: "match_100", num: 100, group: "Quarter-final", date: "11/07", time: "20:00", datetime: "2026-07-11T20:00:00+07:00", teamHome: "W95", teamAway: "W96", scoreHome: null, scoreAway: null },
+  { id: "match_101", num: 101, group: "Semi-final", date: "14/07", time: "14:00", datetime: "2026-07-14T14:00:00+07:00", teamHome: "W97", teamAway: "W98", scoreHome: null, scoreAway: null },
+  { id: "match_102", num: 102, group: "Semi-final", date: "15/07", time: "15:00", datetime: "2026-07-15T15:00:00+07:00", teamHome: "W99", teamAway: "W100", scoreHome: null, scoreAway: null },
+  { id: "match_103", num: 103, group: "Match for third place", date: "18/07", time: "17:00", datetime: "2026-07-18T17:00:00+07:00", teamHome: "L101", teamAway: "L102", scoreHome: null, scoreAway: null },
+  { id: "match_104", num: 104, group: "Final", date: "19/07", time: "15:00", datetime: "2026-07-19T15:00:00+07:00", teamHome: "W101", teamAway: "W102", scoreHome: null, scoreAway: null }
+];
+
 // Initialize database template
 const defaultDB = {
   users: [
@@ -130,7 +166,7 @@ const defaultDB = {
       createdAt: new Date().toISOString()
     }
   ],
-  matches: seededMatches,
+  matches: [...seededMatches, ...knockoutMatches],
   predictions: [],
   settings: {
     inviteCode: 'HOANGVIET2026'
@@ -165,6 +201,16 @@ function migrateDatabase(db) {
 
   let needsMigration = false;
   if (db && db.matches && Array.isArray(db.matches)) {
+    // Seed knockout matches if they don't exist yet (migration for existing db)
+    if (db.matches.length < 104) {
+      for (const ko of knockoutMatches) {
+        if (!db.matches.some(m => m.id === ko.id)) {
+          db.matches.push(ko);
+          needsMigration = true;
+        }
+      }
+    }
+
     db.matches = db.matches.map(m => {
       let updated = false;
       let teamHome = m.teamHome;
@@ -172,23 +218,25 @@ function migrateDatabase(db) {
       let scoreHome = m.scoreHome;
       let scoreAway = m.scoreAway;
 
-      // 1. Migrate TBD team names
-      if (teamHome === 'TBD' && tbdMapping[m.group]) {
-        teamHome = tbdMapping[m.group];
-        updated = true;
-      }
-      if (teamAway === 'TBD' && tbdMapping[m.group]) {
-        teamAway = tbdMapping[m.group];
-        updated = true;
-      }
-
-      // 2. Migrate scores for completed matches
-      const seedMatch = seededMatches.find(sm => sm.teamHome === teamHome && sm.teamAway === teamAway);
-      if (seedMatch && seedMatch.scoreHome !== null && seedMatch.scoreAway !== null) {
-        if (scoreHome === null || scoreAway === null) {
-          scoreHome = seedMatch.scoreHome;
-          scoreAway = seedMatch.scoreAway;
+      // 1. Migrate TBD team names (only group stage matches)
+      if (!m.num) {
+        if (teamHome === 'TBD' && tbdMapping[m.group]) {
+          teamHome = tbdMapping[m.group];
           updated = true;
+        }
+        if (teamAway === 'TBD' && tbdMapping[m.group]) {
+          teamAway = tbdMapping[m.group];
+          updated = true;
+        }
+
+        // 2. Migrate scores for completed matches
+        const seedMatch = seededMatches.find(sm => sm.teamHome === teamHome && sm.teamAway === teamAway);
+        if (seedMatch && seedMatch.scoreHome !== null && seedMatch.scoreAway !== null) {
+          if (scoreHome === null || scoreAway === null) {
+            scoreHome = seedMatch.scoreHome;
+            scoreAway = seedMatch.scoreAway;
+            updated = true;
+          }
         }
       }
 
@@ -397,25 +445,80 @@ export async function autoUpdateScores(db) {
     
     let updatedCount = 0;
     
+    // Translation helper for team names & placeholders
+    const translateTeamName = (name) => {
+      if (!name) return '';
+      if (teamTranslation[name]) return teamTranslation[name];
+      
+      // Placeholders: Wxx -> Thắng Trận xx, Lxx -> Thua Trận xx
+      if (name.startsWith('W') && !isNaN(name.substring(1))) {
+        return `Thắng Trận ${name.substring(1)}`;
+      }
+      if (name.startsWith('L') && !isNaN(name.substring(1))) {
+        return `Thua Trận ${name.substring(1)}`;
+      }
+      // Group placeholders: 1A, 2B, 3A/B...
+      if (/^[123][A-L]/.test(name)) {
+        const rank = name[0] === '1' ? 'Nhất' : (name[0] === '2' ? 'Nhì' : 'Hạng 3');
+        const groupName = name.substring(1);
+        return `${rank} ${groupName}`;
+      }
+      return name;
+    };
+
     for (const item of data.matches) {
-      if (item.score && Array.isArray(item.score.ft)) {
-        const homeEng = item.team1;
-        const awayEng = item.team2;
-        
-        const homeViet = teamTranslation[homeEng];
-        const awayViet = teamTranslation[awayEng];
-        
-        if (homeViet && awayViet) {
-          const matchIdx = db.matches.findIndex(m => m.teamHome === homeViet && m.teamAway === awayViet);
-          if (matchIdx !== -1) {
-            const m = db.matches[matchIdx];
+      const homeEng = item.team1;
+      const awayEng = item.team2;
+      
+      const homeViet = translateTeamName(homeEng);
+      const awayViet = translateTeamName(awayEng);
+      
+      if (item.num !== undefined) {
+        // Knockout match: locate by match number
+        const matchId = `match_${item.num}`;
+        const matchIdx = db.matches.findIndex(m => m.id === matchId);
+        if (matchIdx !== -1) {
+          const m = db.matches[matchIdx];
+          let changed = false;
+          
+          if (m.teamHome !== homeViet) {
+            db.matches[matchIdx].teamHome = homeViet;
+            changed = true;
+          }
+          if (m.teamAway !== awayViet) {
+            db.matches[matchIdx].teamAway = awayViet;
+            changed = true;
+          }
+          
+          if (item.score && Array.isArray(item.score.ft)) {
             const scoreHome = item.score.ft[0];
             const scoreAway = item.score.ft[1];
-            
-            if (m.scoreHome === null || m.scoreAway === null || m.scoreHome !== scoreHome || m.scoreAway !== scoreAway) {
+            if (m.scoreHome !== scoreHome || m.scoreAway !== scoreAway) {
               db.matches[matchIdx].scoreHome = scoreHome;
               db.matches[matchIdx].scoreAway = scoreAway;
-              updatedCount++;
+              changed = true;
+            }
+          }
+          
+          if (changed) {
+            updatedCount++;
+          }
+        }
+      } else {
+        // Group match: locate by team names
+        if (item.score && Array.isArray(item.score.ft)) {
+          if (homeViet && awayViet) {
+            const matchIdx = db.matches.findIndex(m => m.teamHome === homeViet && m.teamAway === awayViet);
+            if (matchIdx !== -1) {
+              const m = db.matches[matchIdx];
+              const scoreHome = item.score.ft[0];
+              const scoreAway = item.score.ft[1];
+              
+              if (m.scoreHome === null || m.scoreAway === null || m.scoreHome !== scoreHome || m.scoreAway !== scoreAway) {
+                db.matches[matchIdx].scoreHome = scoreHome;
+                db.matches[matchIdx].scoreAway = scoreAway;
+                updatedCount++;
+              }
             }
           }
         }

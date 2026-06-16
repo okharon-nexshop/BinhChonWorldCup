@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, Calendar, Trophy, Shield, HelpCircle, Loader, User, X, Settings } from 'lucide-react';
+import { LogOut, Calendar, Trophy, Shield, HelpCircle, Loader, User, X, Settings, GitFork } from 'lucide-react';
 import Login from './components/Login';
 import MatchList from './components/MatchList';
 import Leaderboard from './components/Leaderboard';
 import Rules from './components/Rules';
 import AdminPanel from './components/AdminPanel';
+import TournamentBracket from './components/TournamentBracket';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -266,6 +267,13 @@ export default function App() {
             </button>
             <button
               type="button"
+              className={`tab-btn text-xs ${activeTab === 'bracket' ? 'active' : ''}`}
+              onClick={() => setActiveTab('bracket')}
+            >
+              <GitFork size={14} /> Sơ Đồ Giải
+            </button>
+            <button
+              type="button"
               className={`tab-btn text-xs ${activeTab === 'leaderboard' ? 'active' : ''}`}
               onClick={() => setActiveTab('leaderboard')}
             >
@@ -443,6 +451,13 @@ export default function App() {
 
           {activeTab === 'matches' && (
             <MatchList 
+              matches={matches} 
+              onSavePrediction={handleSavePrediction} 
+            />
+          )}
+
+          {activeTab === 'bracket' && (
+            <TournamentBracket 
               matches={matches} 
               onSavePrediction={handleSavePrediction} 
             />
