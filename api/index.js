@@ -249,6 +249,24 @@ app.post('/api/auth/change-password', authenticate, async (req, res) => {
   }
 });
 
+// Update profile (display name)
+app.post('/api/auth/update-profile', authenticate, async (req, res) => {
+  const { displayName } = req.body;
+  if (!displayName || displayName.trim() === '') {
+    return res.status(400).json({ message: 'Tên hiển thị không được trống' });
+  }
+  try {
+    const db = await readDB();
+    const userIdx = db.users.findIndex(u => u.id === req.user.id);
+    db.users[userIdx].displayName = displayName.trim();
+    await writeDB(db);
+    res.json({ message: 'Cập nhật thông tin thành công', user: { id: req.user.id, displayName: displayName.trim(), role: req.user.role, username: req.user.username } });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
+
 // --- MATCHES ROUTER ---
 app.get('/api/matches', authenticate, async (req, res) => {
   try {
@@ -494,7 +512,7 @@ app.post('/api/admin/invite-code', authenticate, requireAdmin, async (req, res) 
 
 app.put('/api/admin/users/:userId', authenticate, requireAdmin, async (req, res) => {
   const targetId = req.params.userId;
-  const { displayName, role } = req.body;
+  const { displayName, role, username } = req.body;
 
   try {
     const db = await readDB();
@@ -505,6 +523,15 @@ app.put('/api/admin/users/:userId', authenticate, requireAdmin, async (req, res)
 
     if (targetId === 'user_admin' && role && role !== 'admin') {
       return res.status(400).json({ message: 'Không thể hạ quyền của tài khoản admin mặc định' });
+    }
+
+    if (username && username.trim() !== '') {
+      const lowerUsername = username.trim().toLowerCase();
+      const userExists = db.users.find(u => u.id !== targetId && u.username.toLowerCase() === lowerUsername);
+      if (userExists) {
+        return res.status(400).json({ message: 'Tên đăng nhập đã tồn tại' });
+      }
+      db.users[userIdx].username = username.trim();
     }
 
     if (displayName) db.users[userIdx].displayName = displayName.trim();

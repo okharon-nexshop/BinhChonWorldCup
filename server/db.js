@@ -12,57 +12,57 @@ const DB_PATH = path.join(DATA_DIR, 'db.json');
 // Default group matches parsed from user request
 const groupMatches = [
   // Bảng A
-  { group: 'Bảng A', date: '12/06', time: '02:00', teamHome: 'Mexico', teamAway: 'Nam Phi' },
-  { group: 'Bảng A', date: '12/06', time: '09:00', teamHome: 'Hàn Quốc', teamAway: 'Cộng hòa Séc' },
+  { group: 'Bảng A', date: '12/06', time: '02:00', teamHome: 'Mexico', teamAway: 'Nam Phi', scoreHome: 2, scoreAway: 0 },
+  { group: 'Bảng A', date: '12/06', time: '09:00', teamHome: 'Hàn Quốc', teamAway: 'Cộng hòa Séc', scoreHome: 2, scoreAway: 1 },
   { group: 'Bảng A', date: '18/06', time: '23:00', teamHome: 'Cộng hòa Séc', teamAway: 'Nam Phi' },
   { group: 'Bảng A', date: '19/06', time: '08:00', teamHome: 'Mexico', teamAway: 'Hàn Quốc' },
   { group: 'Bảng A', date: '25/06', time: '08:00', teamHome: 'Nam Phi', teamAway: 'Hàn Quốc' },
   { group: 'Bảng A', date: '25/06', time: '08:00', teamHome: 'Cộng hòa Séc', teamAway: 'Mexico' },
   // Bảng B
-  { group: 'Bảng B', date: '13/06', time: '02:00', teamHome: 'Canada', teamAway: 'Bosnia' },
-  { group: 'Bảng B', date: '14/06', time: '02:00', teamHome: 'Qatar', teamAway: 'Thụy Sĩ' },
+  { group: 'Bảng B', date: '13/06', time: '02:00', teamHome: 'Canada', teamAway: 'Bosnia', scoreHome: 1, scoreAway: 1 },
+  { group: 'Bảng B', date: '14/06', time: '02:00', teamHome: 'Qatar', teamAway: 'Thụy Sĩ', scoreHome: 1, scoreAway: 1 },
   { group: 'Bảng B', date: '19/06', time: '02:00', teamHome: 'Thụy Sĩ', teamAway: 'Bosnia' },
   { group: 'Bảng B', date: '19/06', time: '05:00', teamHome: 'Canada', teamAway: 'Qatar' },
   { group: 'Bảng B', date: '25/06', time: '02:00', teamHome: 'Thụy Sĩ', teamAway: 'Canada' },
   { group: 'Bảng B', date: '25/06', time: '02:00', teamHome: 'Bosnia', teamAway: 'Qatar' },
   // Bảng C
-  { group: 'Bảng C', date: '14/06', time: '05:00', teamHome: 'Brazil', teamAway: 'Morocco' },
-  { group: 'Bảng C', date: '14/06', time: '08:00', teamHome: 'Haiti', teamAway: 'Scotland' },
+  { group: 'Bảng C', date: '14/06', time: '05:00', teamHome: 'Brazil', teamAway: 'Morocco', scoreHome: 1, scoreAway: 1 },
+  { group: 'Bảng C', date: '14/06', time: '08:00', teamHome: 'Haiti', teamAway: 'Scotland', scoreHome: 0, scoreAway: 1 },
   { group: 'Bảng C', date: '20/06', time: '05:00', teamHome: 'Scotland', teamAway: 'Morocco' },
   { group: 'Bảng C', date: '20/06', time: '08:00', teamHome: 'Brazil', teamAway: 'Haiti' },
   { group: 'Bảng C', date: '25/06', time: '05:00', teamHome: 'Morocco', teamAway: 'Haiti' },
   { group: 'Bảng C', date: '25/06', time: '05:00', teamHome: 'Scotland', teamAway: 'Brazil' },
   // Bảng D
-  { group: 'Bảng D', date: '13/06', time: '08:00', teamHome: 'Mỹ', teamAway: 'Paraguay' },
-  { group: 'Bảng D', date: '14/06', time: '11:00', teamHome: 'Úc', teamAway: 'Thổ Nhĩ Kỳ' },
+  { group: 'Bảng D', date: '13/06', time: '08:00', teamHome: 'Mỹ', teamAway: 'Paraguay', scoreHome: 4, scoreAway: 1 },
+  { group: 'Bảng D', date: '14/06', time: '11:00', teamHome: 'Úc', teamAway: 'Thổ Nhĩ Kỳ', scoreHome: 2, scoreAway: 0 },
   { group: 'Bảng D', date: '20/06', time: '02:00', teamHome: 'Mỹ', teamAway: 'Úc' },
   { group: 'Bảng D', date: '20/06', time: '11:00', teamHome: 'Thổ Nhĩ Kỳ', teamAway: 'Paraguay' },
   { group: 'Bảng D', date: '26/06', time: '09:00', teamHome: 'Mỹ', teamAway: 'Thổ Nhĩ Kỳ' },
   { group: 'Bảng D', date: '26/06', time: '09:00', teamHome: 'Paraguay', teamAway: 'Úc' },
   // Bảng E
-  { group: 'Bảng E', date: '15/06', time: '00:00', teamHome: 'Đức', teamAway: 'Curaçao' },
-  { group: 'Bảng E', date: '15/06', time: '06:00', teamHome: 'Bờ Biển Ngà', teamAway: 'Ecuador' },
+  { group: 'Bảng E', date: '15/06', time: '00:00', teamHome: 'Đức', teamAway: 'Curaçao', scoreHome: 7, scoreAway: 1 },
+  { group: 'Bảng E', date: '15/06', time: '06:00', teamHome: 'Bờ Biển Ngà', teamAway: 'Ecuador', scoreHome: 1, scoreAway: 0 },
   { group: 'Bảng E', date: '21/06', time: '03:00', teamHome: 'Đức', teamAway: 'Bờ Biển Ngà' },
   { group: 'Bảng E', date: '21/06', time: '07:00', teamHome: 'Ecuador', teamAway: 'Curaçao' },
   { group: 'Bảng E', date: '26/06', time: '03:00', teamHome: 'Ecuador', teamAway: 'Đức' },
   { group: 'Bảng E', date: '26/06', time: '03:00', teamHome: 'Curaçao', teamAway: 'Bờ Biển Ngà' },
   // Bảng F
-  { group: 'Bảng F', date: '15/06', time: '03:00', teamHome: 'Hà Lan', teamAway: 'Nhật Bản' },
-  { group: 'Bảng F', date: '15/06', time: '09:00', teamHome: 'Thụy Điển', teamAway: 'Tunisia' },
+  { group: 'Bảng F', date: '15/06', time: '03:00', teamHome: 'Hà Lan', teamAway: 'Nhật Bản', scoreHome: 2, scoreAway: 2 },
+  { group: 'Bảng F', date: '15/06', time: '09:00', teamHome: 'Thụy Điển', teamAway: 'Tunisia', scoreHome: 5, scoreAway: 1 },
   { group: 'Bảng F', date: '21/06', time: '00:00', teamHome: 'Hà Lan', teamAway: 'Thụy Điển' },
   { group: 'Bảng F', date: '21/06', time: '11:00', teamHome: 'Tunisia', teamAway: 'Nhật Bản' },
   { group: 'Bảng F', date: '26/06', time: '06:00', teamHome: 'Nhật Bản', teamAway: 'Thụy Điển' },
   { group: 'Bảng F', date: '26/06', time: '06:00', teamHome: 'Tunisia', teamAway: 'Hà Lan' },
   // Bảng G
-  { group: 'Bảng G', date: '16/06', time: '02:00', teamHome: 'Bỉ', teamAway: 'Ai Cập' },
-  { group: 'Bảng G', date: '16/06', time: '08:00', teamHome: 'Iran', teamAway: 'New Zealand' },
+  { group: 'Bảng G', date: '16/06', time: '02:00', teamHome: 'Bỉ', teamAway: 'Ai Cập', scoreHome: 1, scoreAway: 1 },
+  { group: 'Bảng G', date: '16/06', time: '08:00', teamHome: 'Iran', teamAway: 'New Zealand', scoreHome: 2, scoreAway: 2 },
   { group: 'Bảng G', date: '22/06', time: '02:00', teamHome: 'Bỉ', teamAway: 'Iran' },
   { group: 'Bảng G', date: '22/06', time: '08:00', teamHome: 'New Zealand', teamAway: 'Ai Cập' },
   { group: 'Bảng G', date: '27/06', time: '10:00', teamHome: 'New Zealand', teamAway: 'Bỉ' },
   { group: 'Bảng G', date: '27/06', time: '10:00', teamHome: 'Ai Cập', teamAway: 'Iran' },
   // Bảng H
-  { group: 'Bảng H', date: '15/06', time: '23:00', teamHome: 'Tây Ban Nha', teamAway: 'Cape Verde' },
-  { group: 'Bảng H', date: '16/06', time: '05:00', teamHome: 'Ả Rập Xê Út', teamAway: 'Uruguay' },
+  { group: 'Bảng H', date: '15/06', time: '23:00', teamHome: 'Tây Ban Nha', teamAway: 'Cape Verde', scoreHome: 0, scoreAway: 0 },
+  { group: 'Bảng H', date: '16/06', time: '05:00', teamHome: 'Ả Rập Xê Út', teamAway: 'Uruguay', scoreHome: 1, scoreAway: 1 },
   { group: 'Bảng H', date: '21/06', time: '23:00', teamHome: 'Tây Ban Nha', teamAway: 'Ả Rập Xê Út' },
   { group: 'Bảng H', date: '22/06', time: '05:00', teamHome: 'Uruguay', teamAway: 'Cape Verde' },
   { group: 'Bảng H', date: '27/06', time: '07:00', teamHome: 'Cape Verde', teamAway: 'Ả Rập Xê Út' },
@@ -113,8 +113,8 @@ const seededMatches = groupMatches.map((m, idx) => ({
   datetime: parseMatchDatetime(m.date, m.time),
   teamHome: m.teamHome,
   teamAway: m.teamAway,
-  scoreHome: null,
-  scoreAway: null
+  scoreHome: m.scoreHome !== undefined ? m.scoreHome : null,
+  scoreAway: m.scoreAway !== undefined ? m.scoreAway : null
 }));
 
 // Initialize database template
@@ -169,6 +169,10 @@ function migrateDatabase(db) {
       let updated = false;
       let teamHome = m.teamHome;
       let teamAway = m.teamAway;
+      let scoreHome = m.scoreHome;
+      let scoreAway = m.scoreAway;
+
+      // 1. Migrate TBD team names
       if (teamHome === 'TBD' && tbdMapping[m.group]) {
         teamHome = tbdMapping[m.group];
         updated = true;
@@ -177,9 +181,20 @@ function migrateDatabase(db) {
         teamAway = tbdMapping[m.group];
         updated = true;
       }
+
+      // 2. Migrate scores for completed matches
+      const seedMatch = seededMatches.find(sm => sm.teamHome === teamHome && sm.teamAway === teamAway);
+      if (seedMatch && seedMatch.scoreHome !== null && seedMatch.scoreAway !== null) {
+        if (scoreHome === null || scoreAway === null) {
+          scoreHome = seedMatch.scoreHome;
+          scoreAway = seedMatch.scoreAway;
+          updated = true;
+        }
+      }
+
       if (updated) {
         needsMigration = true;
-        return { ...m, teamHome, teamAway };
+        return { ...m, teamHome, teamAway, scoreHome, scoreAway };
       }
       return m;
     });

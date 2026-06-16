@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, Calendar, Trophy, Shield, HelpCircle, Loader, User } from 'lucide-react';
+import { LogOut, Calendar, Trophy, Shield, HelpCircle, Loader, User, X, Settings } from 'lucide-react';
 import Login from './components/Login';
 import MatchList from './components/MatchList';
 import Leaderboard from './components/Leaderboard';
@@ -16,6 +16,14 @@ export default function App() {
   const [finishedCount, setFinishedCount] = useState(0);
   const [userStats, setUserStats] = useState({ correct: 0, wrong: 0, missed: 0 });
   const [dataLoading, setDataLoading] = useState(false);
+
+  // Profile modal states
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileDisplayName, setProfileDisplayName] = useState('');
+  const [profileOldPassword, setProfileOldPassword] = useState('');
+  const [profileNewPassword, setProfileNewPassword] = useState('');
+  const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
+  const [profileSaving, setProfileSaving] = useState(false);
 
   // Check auth status
   const checkAuth = async () => {
@@ -97,6 +105,81 @@ export default function App() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileMsg({ text: '', type: '' });
+    setProfileSaving(true);
+
+    try {
+      let displayNameUpdated = false;
+      let passwordUpdated = false;
+      let errors = [];
+
+      // 1. Update Display Name if changed
+      if (profileDisplayName.trim() !== user.displayName) {
+        const res = await fetch('/api/auth/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ displayName: profileDisplayName }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          displayNameUpdated = true;
+          setUser(prev => ({ ...prev, displayName: data.user.displayName }));
+        } else {
+          errors.push(data.message || 'Lỗi cập nhật tên hiển thị');
+        }
+      }
+
+      // 2. Update Password if fields are filled
+      if (profileOldPassword || profileNewPassword) {
+        if (!profileOldPassword || !profileNewPassword) {
+          errors.push('Vui lòng nhập cả mật khẩu cũ và mới để đổi mật khẩu');
+        } else if (profileNewPassword.length < 6) {
+          errors.push('Mật khẩu mới phải từ 6 ký tự trở lên');
+        } else {
+          const res = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldPassword: profileOldPassword, newPassword: profileNewPassword }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            passwordUpdated = true;
+            setProfileOldPassword('');
+            setProfileNewPassword('');
+          } else {
+            errors.push(data.message || 'Lỗi đổi mật khẩu');
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        setProfileMsg({ text: errors.join('. '), type: 'error' });
+      } else if (displayNameUpdated || passwordUpdated) {
+        let msg = 'Cập nhật thành công';
+        if (displayNameUpdated && passwordUpdated) {
+          msg = 'Cập nhật tên hiển thị và đổi mật khẩu thành công';
+        } else if (displayNameUpdated) {
+          msg = 'Cập nhật tên hiển thị thành công';
+        } else if (passwordUpdated) {
+          msg = 'Đổi mật khẩu thành công';
+        }
+        setProfileMsg({ text: msg, type: 'success' });
+        setTimeout(() => {
+          setShowProfileModal(false);
+        }, 1500);
+      } else {
+        setProfileMsg({ text: 'Không có thông tin nào thay đổi', type: 'info' });
+      }
+    } catch (err) {
+      console.error(err);
+      setProfileMsg({ text: 'Không thể kết nối đến máy chủ', type: 'error' });
+    } finally {
+      setProfileSaving(false);
     }
   };
 
@@ -207,13 +290,26 @@ export default function App() {
           {/* User details & logout */}
           <div className="flex items-center gap-3 flex-shrink-0">
             {/* User card info */}
-            <div className="flex items-center gap-2.5 bg-black/30 py-1.5 px-3 rounded-xl border border-white/5 text-xs">
-              <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-                <User size={14} />
+            <div 
+              onClick={() => {
+                setProfileDisplayName(user.displayName);
+                setProfileOldPassword('');
+                setProfileNewPassword('');
+                setProfileMsg({ text: '', type: '' });
+                setShowProfileModal(true);
+              }}
+              className="flex items-center gap-2.5 bg-black/30 py-1.5 px-3 rounded-xl border border-white/5 text-xs cursor-pointer hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-200 group"
+              title="Cài đặt tài khoản"
+            >
+              <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors">
+                <Settings size={14} />
               </div>
               <div className="text-left">
-                <div className="font-bold text-gray-200 leading-tight">{user.displayName}</div>
-                <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                <div className="font-bold text-gray-200 leading-tight flex items-center gap-1">
+                  {user.displayName}
+                  <span className="text-[9px] text-gray-500 font-normal opacity-0 group-hover:opacity-100 transition-opacity">(Cài đặt)</span>
+                </div>
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
                   <span className="text-[9px] text-emerald-400 font-extrabold bg-emerald-500/10 border border-emerald-500/15 px-1.5 py-0.5 rounded font-mono">
                     Đúng: {userStats.correct}
                   </span>
@@ -306,6 +402,125 @@ export default function App() {
           </span>
         </div>
       </footer>
+
+      {/* PROFILE SETTINGS MODAL */}
+      {showProfileModal && (
+        <div className="modal-backdrop z-[999]" onClick={() => setShowProfileModal(false)}>
+          <div 
+            className="glass-panel w-full max-w-md p-6 relative shadow-2xl border border-white/10 rounded-2xl bg-[#0c1410]/95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button 
+              type="button"
+              onClick={() => setShowProfileModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Header */}
+            <div className="mb-5 flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-inner">
+                <Settings size={18} />
+              </div>
+              <div className="text-left">
+                <h3 className="text-base font-bold text-white leading-tight">Cài Đặt Tài Khoản</h3>
+                <p className="text-xs text-gray-400">@{user.username}</p>
+              </div>
+            </div>
+
+            {/* Message Alert */}
+            {profileMsg.text && (
+              <div className={`mb-4 p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
+                profileMsg.type === 'success' 
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                  : profileMsg.type === 'error'
+                  ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                  : 'bg-white/5 border-white/10 text-gray-300'
+              }`}>
+                <span>{profileMsg.type === 'success' ? '✅' : profileMsg.type === 'error' ? '⚠️' : 'ℹ️'}</span>
+                <span>{profileMsg.text}</span>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              {/* Display Name */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+                  Tên hiển thị (Tên thật)
+                </label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  placeholder="Ví dụ: Vũ Quyết Thắng"
+                  value={profileDisplayName}
+                  onChange={(e) => setProfileDisplayName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="pt-3 border-t border-white/5">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 text-emerald-400">Đổi mật khẩu</h4>
+                <p className="text-[10px] text-gray-400 mb-3 leading-relaxed">
+                  Để trống nếu không muốn đổi mật khẩu. Nếu đổi mật khẩu, vui lòng nhập cả mật khẩu cũ và mới.
+                </p>
+                
+                {/* Old Password */}
+                <div className="mb-3">
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+                    Mật khẩu hiện tại
+                  </label>
+                  <input
+                    type="password"
+                    className="form-input w-full text-xs py-2"
+                    placeholder="••••••••"
+                    value={profileOldPassword}
+                    onChange={(e) => setProfileOldPassword(e.target.value)}
+                  />
+                </div>
+
+                {/* New Password */}
+                <div>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+                    Mật khẩu mới (Tối thiểu 6 ký tự)
+                  </label>
+                  <input
+                    type="password"
+                    className="form-input w-full text-xs py-2"
+                    placeholder="••••••••"
+                    value={profileNewPassword}
+                    onChange={(e) => setProfileNewPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowProfileModal(false)}
+                  className="w-1/3 btn btn-secondary py-2.5 text-xs font-semibold"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={profileSaving}
+                  className="w-2/3 btn btn-primary py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5"
+                >
+                  {profileSaving ? (
+                    <Loader size={14} className="animate-spin" />
+                  ) : (
+                    'Lưu thay đổi'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

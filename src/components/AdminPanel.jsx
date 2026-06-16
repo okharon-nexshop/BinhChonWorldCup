@@ -25,6 +25,7 @@ export default function AdminPanel() {
 
   const [editingUserId, setEditingUserId] = useState(null);
   const [userDisplayNameInput, setUserDisplayNameInput] = useState('');
+  const [userUsernameInput, setUserUsernameInput] = useState('');
   const [userRoleInput, setUserRoleInput] = useState('');
   const [userPasswordInput, setUserPasswordInput] = useState('');
 
@@ -154,13 +155,16 @@ export default function AdminPanel() {
     }
   };
 
-  // Update user stats
   const handleUpdateUser = async (userId) => {
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName: userDisplayNameInput, role: userRoleInput }),
+        body: JSON.stringify({ 
+          displayName: userDisplayNameInput, 
+          role: userRoleInput,
+          username: userUsernameInput
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -436,7 +440,19 @@ export default function AdminPanel() {
 
                         {/* Username */}
                         <td className="py-3.5 px-4 font-mono text-gray-400">
-                          @{u.username}
+                          {isEditing ? (
+                            <div className="flex items-center gap-0.5 max-w-[150px] bg-black/20 px-2 py-1 rounded-lg border border-white/5">
+                              <span className="text-gray-500 text-xs">@</span>
+                              <input
+                                type="text"
+                                className="bg-transparent border-0 outline-none p-0 text-sm font-mono text-gray-200 w-full"
+                                value={userUsernameInput}
+                                onChange={(e) => setUserUsernameInput(e.target.value)}
+                              />
+                            </div>
+                          ) : (
+                            <span>@{u.username}</span>
+                          )}
                         </td>
 
                         {/* Role */}
@@ -503,6 +519,7 @@ export default function AdminPanel() {
                                 onClick={() => {
                                   setEditingUserId(u.id);
                                   setUserDisplayNameInput(u.displayName);
+                                  setUserUsernameInput(u.username);
                                   setUserRoleInput(u.role);
                                   setUserPasswordInput('');
                                 }}
