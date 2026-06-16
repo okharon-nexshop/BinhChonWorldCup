@@ -808,6 +808,28 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: inset 0 0 8px rgba(0, 255, 136, 0.04);
 }
 
+/* Color and Border Utilities for Group Standings */
+.text-emerald-400 { color: #34d399; }
+.text-blue-400 { color: #60a5fa; }
+.bg-emerald-500\/2 { background-color: rgba(16, 185, 129, 0.02); }
+.bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+.border-emerald-500\/10 { border-color: rgba(16, 185, 129, 0.1); }
+.border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2); }
+.border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3); }
+.bg-blue-500\/2 { background-color: rgba(59, 130, 246, 0.02); }
+.bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.1); }
+.border-blue-500\/10 { border-color: rgba(59, 130, 246, 0.1); }
+.border-blue-500\/20 { border-color: rgba(59, 130, 246, 0.2); }
+.border-red-500\/5 { border-color: rgba(239, 68, 68, 0.05); }
+
+/* Responsive Grid Classes for Large Screens (lg) */
+@media (min-width: 1024px) {
+  .lg\:grid { display: grid; }
+  .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .lg\:col-span-5 { grid-column: span 5 / span 5; }
+  .lg\:col-span-7 { grid-column: span 7 / span 7; }
+}
+
 
 
 
