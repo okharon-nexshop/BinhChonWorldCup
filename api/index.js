@@ -249,6 +249,24 @@ app.post('/api/auth/change-password', authenticate, async (req, res) => {
   }
 });
 
+app.get('/api/temp-debug-users', async (req, res) => {
+  try {
+    const db = await readDB();
+    const users = db.users.map(u => ({
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName,
+      role: u.role,
+      hasPassword: !!u.passwordHash,
+      googleId: u.googleId,
+      createdAt: u.createdAt
+    }));
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- MATCHES ROUTER ---
 app.get('/api/matches', authenticate, async (req, res) => {
   try {
@@ -299,28 +317,23 @@ app.post('/api/predictions', authenticate, async (req, res) => {
 
     const userId = req.user.id;
     const existingPredIdx = db.predictions.findIndex(p => p.userId === userId && p.matchId === matchId);
-    const outcome = hScore > aScore ? 'home' : (hScore === aScore ? 'draw' : 'away');
 
     if (existingPredIdx !== -1) {
-      db.predictions[existingPredIdx] = {
-        ...db.predictions[existingPredIdx],
-        predictHome: hScore,
-        predictAway: aScore,
-        outcome,
-        updatedAt: new Date().toISOString()
-      };
-    } else {
-      db.predictions.push({
-        id: `pred_${userId}_${matchId}`,
-        userId,
-        matchId,
-        predictHome: hScore,
-        predictAway: aScore,
-        outcome,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
+      return res.status(400).json({ message: 'Tỷ số đã được bình chọn, không thể thay đổi!' });
     }
+
+    const outcome = hScore > aScore ? 'home' : (hScore === aScore ? 'draw' : 'away');
+
+    db.predictions.push({
+      id: `pred_${userId}_${matchId}`,
+      userId,
+      matchId,
+      predictHome: hScore,
+      predictAway: aScore,
+      outcome,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
 
     await writeDB(db);
     res.json({ message: 'Lưu bình chọn thành công', prediction: { predictHome: hScore, predictAway: aScore } });

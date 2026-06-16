@@ -218,6 +218,21 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
               </span>
             )}
           </div>
+        ) : hasVoted ? (
+          // Voted, not locked yet: read-only
+          <div className="flex flex-col items-center justify-center gap-1.5 text-center text-xs">
+            <div className="flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
+              <span className="text-emerald-400 font-bold flex items-center gap-1">
+                <Check size={12} /> Đã dự đoán:
+              </span>
+              <span className="font-extrabold text-emerald-300 font-mono bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-500/20">
+                {prediction.predictHome} - {prediction.predictAway}
+              </span>
+            </div>
+            <span className="text-[10px] text-gray-500 font-normal italic mt-0.5">
+              🔒 Đã lưu (không thể sửa đổi)
+            </span>
+          </div>
         ) : isVoteOpen ? (
           // Open voting: Centered prediction form
           <form onSubmit={handleSave} className="match-card-prediction-form">

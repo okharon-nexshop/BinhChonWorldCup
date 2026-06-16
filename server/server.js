@@ -311,28 +311,22 @@ app.post('/api/predictions', authenticate, async (req, res) => {
     const userId = req.user.id;
     const existingPredIdx = db.predictions.findIndex(p => p.userId === userId && p.matchId === matchId);
 
+    if (existingPredIdx !== -1) {
+      return res.status(400).json({ message: 'Tỷ số đã được bình chọn, không thể thay đổi!' });
+    }
+
     const outcome = hScore > aScore ? 'home' : (hScore === aScore ? 'draw' : 'away');
 
-    if (existingPredIdx !== -1) {
-      db.predictions[existingPredIdx] = {
-        ...db.predictions[existingPredIdx],
-        predictHome: hScore,
-        predictAway: aScore,
-        outcome,
-        updatedAt: new Date().toISOString()
-      };
-    } else {
-      db.predictions.push({
-        id: `pred_${userId}_${matchId}`,
-        userId,
-        matchId,
-        predictHome: hScore,
-        predictAway: aScore,
-        outcome,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-    }
+    db.predictions.push({
+      id: `pred_${userId}_${matchId}`,
+      userId,
+      matchId,
+      predictHome: hScore,
+      predictAway: aScore,
+      outcome,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
 
     await writeDB(db);
     res.json({ message: 'Lưu bình chọn thành công', prediction: { predictHome: hScore, predictAway: aScore } });
@@ -709,7 +703,7 @@ app.post('/api/admin/matches/:matchId/score', authenticate, requireAdmin, async 
 const distPath = path.join(__dirname, '../dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  app.get('*', (req, res) => {
+  app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 } else {

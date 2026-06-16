@@ -13,18 +13,18 @@ const DB_PATH = path.join(DATA_DIR, 'db.json');
 const groupMatches = [
   // Bảng A
   { group: 'Bảng A', date: '12/06', time: '02:00', teamHome: 'Mexico', teamAway: 'Nam Phi' },
-  { group: 'Bảng A', date: '12/06', time: '09:00', teamHome: 'Hàn Quốc', teamAway: 'TBD' },
-  { group: 'Bảng A', date: '18/06', time: '23:00', teamHome: 'TBD', teamAway: 'Nam Phi' },
+  { group: 'Bảng A', date: '12/06', time: '09:00', teamHome: 'Hàn Quốc', teamAway: 'Cộng hòa Séc' },
+  { group: 'Bảng A', date: '18/06', time: '23:00', teamHome: 'Cộng hòa Séc', teamAway: 'Nam Phi' },
   { group: 'Bảng A', date: '19/06', time: '08:00', teamHome: 'Mexico', teamAway: 'Hàn Quốc' },
   { group: 'Bảng A', date: '25/06', time: '08:00', teamHome: 'Nam Phi', teamAway: 'Hàn Quốc' },
-  { group: 'Bảng A', date: '25/06', time: '08:00', teamHome: 'TBD', teamAway: 'Mexico' },
+  { group: 'Bảng A', date: '25/06', time: '08:00', teamHome: 'Cộng hòa Séc', teamAway: 'Mexico' },
   // Bảng B
-  { group: 'Bảng B', date: '13/06', time: '02:00', teamHome: 'Canada', teamAway: 'TBD' },
+  { group: 'Bảng B', date: '13/06', time: '02:00', teamHome: 'Canada', teamAway: 'Bosnia' },
   { group: 'Bảng B', date: '14/06', time: '02:00', teamHome: 'Qatar', teamAway: 'Thụy Sĩ' },
-  { group: 'Bảng B', date: '19/06', time: '02:00', teamHome: 'Thụy Sĩ', teamAway: 'TBD' },
+  { group: 'Bảng B', date: '19/06', time: '02:00', teamHome: 'Thụy Sĩ', teamAway: 'Bosnia' },
   { group: 'Bảng B', date: '19/06', time: '05:00', teamHome: 'Canada', teamAway: 'Qatar' },
   { group: 'Bảng B', date: '25/06', time: '02:00', teamHome: 'Thụy Sĩ', teamAway: 'Canada' },
-  { group: 'Bảng B', date: '25/06', time: '02:00', teamHome: 'TBD', teamAway: 'Qatar' },
+  { group: 'Bảng B', date: '25/06', time: '02:00', teamHome: 'Bosnia', teamAway: 'Qatar' },
   // Bảng C
   { group: 'Bảng C', date: '14/06', time: '05:00', teamHome: 'Brazil', teamAway: 'Morocco' },
   { group: 'Bảng C', date: '14/06', time: '08:00', teamHome: 'Haiti', teamAway: 'Scotland' },
@@ -34,10 +34,10 @@ const groupMatches = [
   { group: 'Bảng C', date: '25/06', time: '05:00', teamHome: 'Scotland', teamAway: 'Brazil' },
   // Bảng D
   { group: 'Bảng D', date: '13/06', time: '08:00', teamHome: 'Mỹ', teamAway: 'Paraguay' },
-  { group: 'Bảng D', date: '14/06', time: '11:00', teamHome: 'Úc', teamAway: 'TBD' },
+  { group: 'Bảng D', date: '14/06', time: '11:00', teamHome: 'Úc', teamAway: 'Thổ Nhĩ Kỳ' },
   { group: 'Bảng D', date: '20/06', time: '02:00', teamHome: 'Mỹ', teamAway: 'Úc' },
-  { group: 'Bảng D', date: '20/06', time: '11:00', teamHome: 'TBD', teamAway: 'Paraguay' },
-  { group: 'Bảng D', date: '26/06', time: '09:00', teamHome: 'Mỹ', teamAway: 'TBD' },
+  { group: 'Bảng D', date: '20/06', time: '11:00', teamHome: 'Thổ Nhĩ Kỳ', teamAway: 'Paraguay' },
+  { group: 'Bảng D', date: '26/06', time: '09:00', teamHome: 'Mỹ', teamAway: 'Thổ Nhĩ Kỳ' },
   { group: 'Bảng D', date: '26/06', time: '09:00', teamHome: 'Paraguay', teamAway: 'Úc' },
   // Bảng E
   { group: 'Bảng E', date: '15/06', time: '00:00', teamHome: 'Đức', teamAway: 'Curaçao' },
@@ -48,10 +48,10 @@ const groupMatches = [
   { group: 'Bảng E', date: '26/06', time: '03:00', teamHome: 'Curaçao', teamAway: 'Bờ Biển Ngà' },
   // Bảng F
   { group: 'Bảng F', date: '15/06', time: '03:00', teamHome: 'Hà Lan', teamAway: 'Nhật Bản' },
-  { group: 'Bảng F', date: '15/06', time: '09:00', teamHome: 'TBD', teamAway: 'Tunisia' },
-  { group: 'Bảng F', date: '21/06', time: '00:00', teamHome: 'Hà Lan', teamAway: 'TBD' },
+  { group: 'Bảng F', date: '15/06', time: '09:00', teamHome: 'Thụy Điển', teamAway: 'Tunisia' },
+  { group: 'Bảng F', date: '21/06', time: '00:00', teamHome: 'Hà Lan', teamAway: 'Thụy Điển' },
   { group: 'Bảng F', date: '21/06', time: '11:00', teamHome: 'Tunisia', teamAway: 'Nhật Bản' },
-  { group: 'Bảng F', date: '26/06', time: '06:00', teamHome: 'Nhật Bản', teamAway: 'TBD' },
+  { group: 'Bảng F', date: '26/06', time: '06:00', teamHome: 'Nhật Bản', teamAway: 'Thụy Điển' },
   { group: 'Bảng F', date: '26/06', time: '06:00', teamHome: 'Tunisia', teamAway: 'Hà Lan' },
   // Bảng G
   { group: 'Bảng G', date: '16/06', time: '02:00', teamHome: 'Bỉ', teamAway: 'Ai Cập' },
@@ -69,11 +69,11 @@ const groupMatches = [
   { group: 'Bảng H', date: '27/06', time: '07:00', teamHome: 'Uruguay', teamAway: 'Tây Ban Nha' },
   // Bảng I
   { group: 'Bảng I', date: '17/06', time: '02:00', teamHome: 'Pháp', teamAway: 'Senegal' },
-  { group: 'Bảng I', date: '17/06', time: '05:00', teamHome: 'TBD', teamAway: 'Na Uy' },
-  { group: 'Bảng I', date: '23/06', time: '04:00', teamHome: 'Pháp', teamAway: 'TBD' },
+  { group: 'Bảng I', date: '17/06', time: '05:00', teamHome: 'Iraq', teamAway: 'Na Uy' },
+  { group: 'Bảng I', date: '23/06', time: '04:00', teamHome: 'Pháp', teamAway: 'Iraq' },
   { group: 'Bảng I', date: '23/06', time: '07:00', teamHome: 'Na Uy', teamAway: 'Senegal' },
   { group: 'Bảng I', date: '27/06', time: '02:00', teamHome: 'Na Uy', teamAway: 'Pháp' },
-  { group: 'Bảng I', date: '27/06', time: '02:00', teamHome: 'Senegal', teamAway: 'TBD' },
+  { group: 'Bảng I', date: '27/06', time: '02:00', teamHome: 'Senegal', teamAway: 'Iraq' },
   // Bảng J
   { group: 'Bảng J', date: '17/06', time: '08:00', teamHome: 'Argentina', teamAway: 'Algeria' },
   { group: 'Bảng J', date: '17/06', time: '11:00', teamHome: 'Áo', teamAway: 'Jordan' },
@@ -82,12 +82,12 @@ const groupMatches = [
   { group: 'Bảng J', date: '28/06', time: '09:00', teamHome: 'Algeria', teamAway: 'Áo' },
   { group: 'Bảng J', date: '28/06', time: '09:00', teamHome: 'Jordan', teamAway: 'Argentina' },
   // Bảng K
-  { group: 'Bảng K', date: '18/06', time: '00:00', teamHome: 'Bồ Đào Nha', teamAway: 'TBD' },
+  { group: 'Bảng K', date: '18/06', time: '00:00', teamHome: 'Bồ Đào Nha', teamAway: 'CHDC Congo' },
   { group: 'Bảng K', date: '18/06', time: '09:00', teamHome: 'Uzbekistan', teamAway: 'Colombia' },
   { group: 'Bảng K', date: '24/06', time: '00:00', teamHome: 'Bồ Đào Nha', teamAway: 'Uzbekistan' },
-  { group: 'Bảng K', date: '24/06', time: '09:00', teamHome: 'Colombia', teamAway: 'TBD' },
+  { group: 'Bảng K', date: '24/06', time: '09:00', teamHome: 'Colombia', teamAway: 'CHDC Congo' },
   { group: 'Bảng K', date: '28/06', time: '06:30', teamHome: 'Colombia', teamAway: 'Bồ Đào Nha' },
-  { group: 'Bảng K', date: '28/06', time: '06:30', teamHome: 'TBD', teamAway: 'Uzbekistan' },
+  { group: 'Bảng K', date: '28/06', time: '06:30', teamHome: 'CHDC Congo', teamAway: 'Uzbekistan' },
   // Bảng L
   { group: 'Bảng L', date: '18/06', time: '03:00', teamHome: 'Anh', teamAway: 'Croatia' },
   { group: 'Bảng L', date: '18/06', time: '06:00', teamHome: 'Ghana', teamAway: 'Panama' },
@@ -153,6 +153,40 @@ async function getMongoCollection() {
   return dbInstance.collection('app_state');
 }
 
+function migrateDatabase(db) {
+  const tbdMapping = {
+    'Bảng A': 'Cộng hòa Séc',
+    'Bảng B': 'Bosnia',
+    'Bảng D': 'Thổ Nhĩ Kỳ',
+    'Bảng F': 'Thụy Điển',
+    'Bảng I': 'Iraq',
+    'Bảng K': 'CHDC Congo'
+  };
+
+  let needsMigration = false;
+  if (db && db.matches && Array.isArray(db.matches)) {
+    db.matches = db.matches.map(m => {
+      let updated = false;
+      let teamHome = m.teamHome;
+      let teamAway = m.teamAway;
+      if (teamHome === 'TBD' && tbdMapping[m.group]) {
+        teamHome = tbdMapping[m.group];
+        updated = true;
+      }
+      if (teamAway === 'TBD' && tbdMapping[m.group]) {
+        teamAway = tbdMapping[m.group];
+        updated = true;
+      }
+      if (updated) {
+        needsMigration = true;
+        return { ...m, teamHome, teamAway };
+      }
+      return m;
+    });
+  }
+  return { db, needsMigration };
+}
+
 export async function readDB() {
   if (MONGODB_URI) {
     try {
@@ -170,14 +204,21 @@ export async function readDB() {
             console.error('Failed to read local db.json for bootstrapping MongoDB:', e);
           }
         }
-        await collection.insertOne({ _id: 'state_document', ...bootstrapData });
-        return JSON.parse(JSON.stringify(bootstrapData));
+        const { db: migratedDB } = migrateDatabase(bootstrapData);
+        await collection.insertOne({ _id: 'state_document', ...migratedDB });
+        return JSON.parse(JSON.stringify(migratedDB));
       }
       const { _id, ...rest } = doc;
-      return rest;
+      const { db: migratedDB, needsMigration } = migrateDatabase(rest);
+      if (needsMigration) {
+        console.log('Migrating TBD matches in MongoDB...');
+        await writeDB(migratedDB);
+      }
+      return migratedDB;
     } catch (error) {
       console.error('Error reading from MongoDB Atlas, falling back to default:', error);
-      return defaultDB;
+      const { db: migratedDB } = migrateDatabase(defaultDB);
+      return migratedDB;
     }
   }
 
@@ -187,14 +228,22 @@ export async function readDB() {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     if (!fs.existsSync(DB_PATH)) {
-      await writeDB(defaultDB);
-      return defaultDB;
+      const { db: migratedDB } = migrateDatabase(defaultDB);
+      await writeDB(migratedDB);
+      return migratedDB;
     }
     const data = await fs.promises.readFile(DB_PATH, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    const { db: migratedDB, needsMigration } = migrateDatabase(parsed);
+    if (needsMigration) {
+      console.log('Migrating TBD matches in local JSON...');
+      await writeDB(migratedDB);
+    }
+    return migratedDB;
   } catch (error) {
     console.error('Error reading database file, returning default database template:', error);
-    return defaultDB;
+    const { db: migratedDB } = migrateDatabase(defaultDB);
+    return migratedDB;
   }
 }
 
