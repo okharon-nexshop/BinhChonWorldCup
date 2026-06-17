@@ -44,7 +44,7 @@ export default function Login({ onLoginSuccess }) {
           window.google.accounts.id.renderButton(btnContainer, {
             theme: 'filled_blue',
             size: 'large',
-            width: btnContainer.clientWidth || 320,
+            width: Math.min(320, window.innerWidth - 64),
             text: isRegister ? 'signup_with' : 'signin_with',
             shape: 'pill'
           });
@@ -177,15 +177,15 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         {/* RIGHT: Login/Register Credentials Card */}
-        <div className="md:col-span-6 glass-panel p-6 md:p-8 w-full max-w-md mx-auto rounded-3xl border border-white/10 shadow-2xl">
+        <div className="md:col-span-6 glass-panel p-5 md:p-8 w-full max-w-md mx-auto rounded-3xl border border-white/10 shadow-2xl">
           
           {/* Mobile-only logo header */}
           <div className="flex md:hidden flex-col items-center text-center mb-6 border-b border-white/5 pb-4">
-            <div className="bg-white/95 p-3 rounded-2xl shadow-inner border border-white/20 mb-3 w-16 h-16 flex items-center justify-center">
+            <div className="bg-white p-2.5 rounded-2xl shadow-[0_0_15px_rgba(0,255,136,0.15)] border border-emerald-500/25 mb-3 w-16 h-16 flex items-center justify-center">
               <img 
                 src="/worldcup2026_logo.jpg" 
                 alt="World Cup 2026 Logo" 
-                className="max-h-12 object-contain" 
+                className="max-h-11 object-contain rounded-lg" 
               />
             </div>
             <h1 className="text-xl font-extrabold tracking-tight glow-text text-green uppercase leading-none">

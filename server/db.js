@@ -420,19 +420,22 @@ const teamTranslation = {
   "Panama": "Panama"
 };
 
-export async function autoUpdateScores(db) {
+export async function autoUpdateScores(db, force = false) {
   if (!db.settings) {
     db.settings = {};
+  }
+  
+  const now = Date.now();
+  const TEN_MINUTES = 10 * 60 * 1000;
+  
+  if (!force && db.settings.lastAutoUpdateTimestamp && (now - db.settings.lastAutoUpdateTimestamp < TEN_MINUTES)) {
+    return { db, updated: false };
   }
   
   // Today's date in GMT+7
   const todayGMT7 = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0];
   
-  if (db.settings.lastAutoUpdate === todayGMT7) {
-    return { db, updated: false };
-  }
-  
-  console.log(`Checking for automatic match score updates for ${todayGMT7}...`);
+  console.log(`Checking for automatic match score updates for ${todayGMT7} (force=${force})...`);
   try {
     const res = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
     if (!res.ok) {
@@ -526,6 +529,7 @@ export async function autoUpdateScores(db) {
     }
     
     db.settings.lastAutoUpdate = todayGMT7;
+    db.settings.lastAutoUpdateTimestamp = now;
     console.log(`Automatic score updates completed. Updated ${updatedCount} matches.`);
     return { db, updated: updatedCount > 0 };
   } catch (err) {

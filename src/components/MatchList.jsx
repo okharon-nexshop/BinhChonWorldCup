@@ -362,6 +362,26 @@ export default function MatchList({ matches, onSavePrediction }) {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+      {/* Live TV Streaming Info Alert Box */}
+      <div className="glass-panel border border-red-500/25 bg-red-500/5 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0 animate-pulse text-base">
+            📺
+          </div>
+          <div className="text-left">
+            <p className="font-bold text-white leading-tight">Link Xem Trực Tiếp VTVGo</p>
+            <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">Truy cập kênh truyền hình trực tuyến để theo dõi các trận đấu World Cup kịch tính.</p>
+          </div>
+        </div>
+        <a
+          href="https://vtvgo.vn/channel"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-primary bg-red-600 border-red-500 text-black hover:bg-red-500 px-4 py-1.5 text-xs font-bold rounded-lg whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.15)]"
+        >
+          <span>Xem Ngay</span> 🔴
+        </a>
+      </div>
       {/* Filters/Tabs bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
         <h2 className="text-xl font-bold flex items-center gap-2">

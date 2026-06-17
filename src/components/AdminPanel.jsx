@@ -34,6 +34,30 @@ export default function AdminPanel() {
     setTimeout(() => setMessage({ text: '', type: '' }), 4000);
   };
 
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncScores = async () => {
+    setSyncing(true);
+    setMessage({ text: 'Đang đồng bộ kết quả từ GitHub...', type: 'info' });
+    try {
+      const res = await fetch('/api/admin/sync-scores', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showMsg(data.message, data.updated ? 'success' : 'info');
+        fetchData();
+      } else {
+        throw new Error(data.message || 'Lỗi đồng bộ');
+      }
+    } catch (err) {
+      console.error(err);
+      showMsg(err.message, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   // Fetch initial data
   const fetchData = async () => {
     setLoading(true);
@@ -264,13 +288,25 @@ export default function AdminPanel() {
         <div className="glass-panel p-6 space-y-4">
           <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
             <h3 className="font-bold text-gray-200">Danh Sách Trận Đấu & Cập Nhật Tỷ Số</h3>
-            <button
-              type="button"
-              className="btn btn-secondary py-1 px-3 text-xs flex items-center gap-1"
-              onClick={fetchData}
-            >
-              <RefreshCw size={12} /> Tải lại lịch đấu
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="btn btn-primary py-1 px-3 text-xs flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black border-none"
+                onClick={handleSyncScores}
+                disabled={syncing}
+              >
+                <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
+                <span>Đồng bộ từ GitHub</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary py-1 px-3 text-xs flex items-center gap-1"
+                onClick={fetchData}
+                disabled={loading}
+              >
+                <RefreshCw size={12} className={loading && !syncing ? 'animate-spin' : ''} /> Tải lại lịch đấu
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3.5 max-h-[65vh] overflow-y-auto pr-1">

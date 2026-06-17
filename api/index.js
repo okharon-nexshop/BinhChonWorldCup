@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import path from 'url';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { readDB, writeDB, getCongratulationsData } from '../server/db.js';
+import { readDB, writeDB, getCongratulationsData, autoUpdateScores } from '../server/db.js';
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'worldcup2026-super-secret-key-change-in-prod';
@@ -696,6 +696,26 @@ app.post('/api/admin/matches/:matchId/score', authenticate, requireAdmin, async 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
+
+app.post('/api/admin/sync-scores', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let db = await readDB();
+    console.log('Admin triggered manual score sync...');
+    const result = await autoUpdateScores(db, true); // force=true
+    
+    if (result.updated) {
+      console.log('Scores updated successfully from GitHub. Writing to DB...');
+      await writeDB(result.db);
+      res.json({ message: 'Đồng bộ kết quả từ GitHub thành công! Đã cập nhật tỷ số mới.', updated: true });
+    } else {
+      console.log('GitHub worldcup.json has no new score updates.');
+      res.json({ message: 'Đồng bộ hoàn tất. Không có tỷ số nào mới cần cập nhật.', updated: false });
+    }
+  } catch (error) {
+    console.error('Manual score sync failed:', error);
+    res.status(500).json({ message: 'Lỗi đồng bộ kết quả: ' + error.message });
   }
 });
 

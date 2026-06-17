@@ -15,7 +15,7 @@ export default function App() {
   const [matches, setMatches] = useState([]);
   const [poolBalance, setPoolBalance] = useState(0);
   const [finishedCount, setFinishedCount] = useState(0);
-  const [userStats, setUserStats] = useState({ correct: 0, wrong: 0, missed: 0 });
+  const [userStats, setUserStats] = useState({ correct: 0, wrong: 0, missed: 0, balance: 0 });
   const [dataLoading, setDataLoading] = useState(false);
 
   // Profile modal states
@@ -72,7 +72,8 @@ export default function App() {
           setUserStats({
             correct: currentUserStats.correctScores + currentUserStats.correctOutcomes,
             wrong: currentUserStats.wrongOutcomes,
-            missed: currentUserStats.missed
+            missed: currentUserStats.missed,
+            balance: currentUserStats.balance
           });
         }
       }
@@ -240,24 +241,24 @@ export default function App() {
     <div className="min-h-screen flex flex-col justify-between">
       
       {/* HEADER SECTION */}
-      <header className="glass-panel border-x-0 border-t-0 rounded-none border-b border-white/5 py-4 px-6 sticky top-0 z-50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <header className="glass-panel border-x-0 border-t-0 rounded-none border-b border-white/5 py-3 px-4 sm:px-6 sticky top-0 z-50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto flex justify-between items-center w-full gap-2 sm:gap-4">
           
           {/* Logo Title */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg shadow-inner">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base shadow-inner">
               ⚽
             </div>
             <div className="text-left">
-              <h1 className="text-sm font-extrabold tracking-tight text-white uppercase whitespace-nowrap">
-                WC 2026 <span className="text-[9px] text-emerald-400 font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 inline-block align-middle ml-1">FOR FUN</span>
+              <h1 className="text-xs sm:text-sm font-extrabold tracking-tight text-white uppercase whitespace-nowrap flex items-center gap-1">
+                WC 2026 <span className="text-[8px] text-emerald-400 font-semibold px-1 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 inline-block">FOR FUN</span>
               </h1>
-              <p className="text-[9px] text-gray-500 font-medium">Canada • Mỹ • Mexico</p>
+              <p className="text-[8px] text-gray-500 font-medium hidden sm:block">Canada • Mỹ • Mexico</p>
             </div>
           </div>
 
-          {/* Navigation tabs */}
-          <nav className="tabs-container flex-shrink-0">
+          {/* Navigation tabs (hidden on mobile, shown on desktop) */}
+          <nav className="tabs-container hidden md:flex flex-shrink-0">
             <button
               type="button"
               className={`tab-btn text-xs ${activeTab === 'matches' ? 'active' : ''}`}
@@ -297,8 +298,21 @@ export default function App() {
             )}
           </nav>
 
-          {/* User details & logout */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          {/* User details, live link & logout */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Live stream link */}
+            <a
+              href="https://vtvgo.vn/channel"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 py-1 px-2 sm:px-3 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 text-[10px] sm:text-xs font-bold hover:bg-red-600/20 hover:border-red-500/40 transition-all animate-pulse"
+              title="Xem trực tiếp VTV"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block" />
+              <span className="hidden sm:inline">Trực Tiếp</span>
+              <span className="sm:hidden">Xem Live</span>
+            </a>
+
             {/* User card info */}
             <div 
               onClick={() => {
@@ -308,18 +322,21 @@ export default function App() {
                 setProfileMsg({ text: '', type: '' });
                 setShowProfileModal(true);
               }}
-              className="flex items-center gap-2.5 bg-black/30 py-1.5 px-3 rounded-xl border border-white/5 text-xs cursor-pointer hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-200 group"
+              className="flex items-center gap-2 bg-black/30 py-1 px-1 sm:py-1.5 sm:px-3 rounded-xl border border-white/5 text-xs cursor-pointer hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-200 group"
               title="Cài đặt tài khoản"
             >
               <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors">
                 <Settings size={14} />
               </div>
-              <div className="text-left">
+              <div className="hidden md:block text-left">
                 <div className="font-bold text-gray-200 leading-tight flex items-center gap-1">
                   {user.displayName}
                   <span className="text-[9px] text-gray-500 font-normal opacity-0 group-hover:opacity-100 transition-opacity">(Cài đặt)</span>
                 </div>
                 <div className="flex items-center gap-1 mt-1 flex-wrap">
+                  <span className="text-[9px] text-cyan-400 font-extrabold bg-cyan-500/10 border border-cyan-500/15 px-1.5 py-0.5 rounded font-mono">
+                    Điểm: {userStats.balance >= 0 ? '+' : ''}{userStats.balance}
+                  </span>
                   <span className="text-[9px] text-emerald-400 font-extrabold bg-emerald-500/10 border border-emerald-500/15 px-1.5 py-0.5 rounded font-mono">
                     Đúng: {userStats.correct}
                   </span>
@@ -336,11 +353,11 @@ export default function App() {
             {/* Logout button */}
             <button
               type="button"
-              className="btn btn-secondary p-2.5 rounded-xl hover:text-red-400 flex-shrink-0"
+              className="btn btn-secondary p-2 sm:p-2.5 rounded-xl hover:text-red-400 flex-shrink-0"
               onClick={handleLogout}
               title="Đăng xuất"
             >
-              <LogOut size={16} />
+              <LogOut size={15} />
             </button>
           </div>
 
@@ -348,11 +365,11 @@ export default function App() {
       </header>
 
       {/* MAIN VIEWPORT */}
-      <main className="flex-grow py-8 px-4 sm:px-6">
+      <main className="flex-grow py-4 sm:py-8 px-2 sm:px-6">
         <div className="max-w-7xl mx-auto space-y-6">
           
-          {/* Centered Logo Banner & Title */}
-          <div className="glass-panel brand-banner-container">
+          {/* Centered Logo Banner & Title (hidden on mobile) */}
+          <div className="glass-panel brand-banner-container hidden md:block">
             {/* Soft radial background glow */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,136,0.06)_0%,transparent_70%)] pointer-events-none" />
             
@@ -532,6 +549,29 @@ export default function App() {
               </div>
             )}
 
+            {/* User stats card (visible on mobile / desktop inside modal) */}
+            <div className="mb-4 bg-black/40 p-3.5 rounded-xl border border-white/5 space-y-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500">Thống Kê Bình Chọn của Bạn</span>
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="bg-cyan-500/10 border border-cyan-500/20 py-2 rounded-lg">
+                  <div className="text-cyan-400 font-extrabold text-sm font-mono">{userStats.balance >= 0 ? '+' : ''}{userStats.balance}</div>
+                  <div className="text-[9px] text-cyan-500 font-bold uppercase mt-0.5">Điểm số</div>
+                </div>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 py-2 rounded-lg">
+                  <div className="text-emerald-400 font-extrabold text-sm font-mono">{userStats.correct}</div>
+                  <div className="text-[9px] text-emerald-500 font-bold uppercase mt-0.5">Đoán Đúng</div>
+                </div>
+                <div className="bg-red-500/10 border border-red-500/20 py-2 rounded-lg">
+                  <div className="text-red-400 font-extrabold text-sm font-mono">{userStats.wrong}</div>
+                  <div className="text-[9px] text-red-500 font-bold uppercase mt-0.5">Đoán Sai</div>
+                </div>
+                <div className="bg-white/5 border border-white/10 py-2 rounded-lg">
+                  <div className="text-gray-300 font-extrabold text-sm font-mono">{userStats.missed}</div>
+                  <div className="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Bỏ Lỡ</div>
+                </div>
+              </div>
+            </div>
+
             {/* Form */}
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               {/* Display Name */}
@@ -608,6 +648,54 @@ export default function App() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      {user && (
+        <nav className="mobile-bottom-nav md:hidden">
+          <button
+            type="button"
+            className={`mobile-bottom-nav-btn ${activeTab === 'matches' ? 'active' : ''}`}
+            onClick={() => setActiveTab('matches')}
+          >
+            <Calendar size={18} />
+            <span>Bình Chọn</span>
+          </button>
+          <button
+            type="button"
+            className={`mobile-bottom-nav-btn ${activeTab === 'bracket' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bracket')}
+          >
+            <GitFork size={18} />
+            <span>Sơ Đồ Giải</span>
+          </button>
+          <button
+            type="button"
+            className={`mobile-bottom-nav-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('leaderboard')}
+          >
+            <Trophy size={18} />
+            <span>Xếp Hạng</span>
+          </button>
+          <button
+            type="button"
+            className={`mobile-bottom-nav-btn ${activeTab === 'rules' ? 'active' : ''}`}
+            onClick={() => setActiveTab('rules')}
+          >
+            <HelpCircle size={18} />
+            <span>Luật Chơi</span>
+          </button>
+          {user.role === 'admin' && (
+            <button
+              type="button"
+              className={`mobile-bottom-nav-btn ${activeTab === 'admin' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin')}
+            >
+              <Shield size={18} />
+              <span>Quản Trị</span>
+            </button>
+          )}
+        </nav>
       )}
 
     </div>

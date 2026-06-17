@@ -82,10 +82,10 @@ export default function Rules({ finishedCount, totalCount }) {
                 ✓
               </div>
               <div>
-                <h3 className="font-semibold text-emerald-400 mb-1">Dự đoán ĐÚNG kết quả</h3>
+                <h3 className="font-semibold text-emerald-400 mb-1">Dự đoán ĐÚNG kết quả (Điểm: 0)</h3>
                 <p className="text-sm text-gray-300">
                   Dự đoán đúng đội thắng, đội thua hoặc kết quả hòa nhưng sai tỷ số cụ thể. 
-                  Ghi nhận trạng thái: <strong>Đoán đúng</strong>.
+                  Ghi nhận trạng thái: <strong>Đoán đúng</strong>. Không cộng/trừ điểm.
                 </p>
                 <span className="text-[11px] text-gray-500 block mt-1">
                   Ví dụ: Dự đoán 1-0, kết quả thực tế là 2-1 (Chủ nhà thắng)
@@ -99,10 +99,10 @@ export default function Rules({ finishedCount, totalCount }) {
                 ✗
               </div>
               <div>
-                <h3 className="font-semibold text-red-400 mb-1">Dự đoán SAI kết quả</h3>
+                <h3 className="font-semibold text-red-400 mb-1">Dự đoán SAI kết quả (Điểm: -100)</h3>
                 <p className="text-sm text-gray-300">
                   Dự đoán sai đội thắng/thua hoặc hòa. 
-                  Ghi nhận trạng thái: <strong>Đoán sai</strong>.
+                  Ghi nhận trạng thái: <strong>Đoán sai</strong>. Bị trừ 100 điểm.
                 </p>
                 <span className="text-[11px] text-gray-500 block mt-1">
                   Ví dụ: Dự đoán 1-1, kết quả thực tế là 2-1 (Chủ nhà thắng)
@@ -116,10 +116,10 @@ export default function Rules({ finishedCount, totalCount }) {
                 ★
               </div>
               <div>
-                <h3 className="font-semibold text-amber-400 mb-1">Dự đoán ĐÚNG CẢ TỶ SỐ</h3>
+                <h3 className="font-semibold text-amber-400 mb-1">Dự đoán ĐÚNG CẢ TỶ SỐ (Điểm: +100)</h3>
                 <p className="text-sm text-gray-300">
                   Dự đoán chính xác tuyệt đối tỷ số trận đấu. 
-                  Ghi nhận trạng thái: <strong>Đoán đúng (Trúng tỷ số)</strong>.
+                  Ghi nhận trạng thái: <strong>Đoán đúng (Trúng tỷ số)</strong>. Được cộng 100 điểm.
                 </p>
                 <span className="text-[11px] text-gray-500 block mt-1">
                   Ví dụ: Dự đoán 2-1, kết quả thực tế là 2-1
@@ -133,10 +133,10 @@ export default function Rules({ finishedCount, totalCount }) {
                 ⏰
               </div>
               <div>
-                <h3 className="font-semibold text-red-400 mb-1">Không bình chọn / Quá hạn</h3>
+                <h3 className="font-semibold text-red-400 mb-1">Không bình chọn / Quá hạn (Điểm: -100)</h3>
                 <p className="text-sm text-gray-300">
                   Trận đấu đã lăn bóng mà bạn chưa gửi bình chọn. 
-                  Ghi nhận trạng thái: <strong>Không dự đoán</strong> (Coi như đoán sai).
+                  Ghi nhận trạng thái: <strong>Không dự đoán</strong> (Coi như đoán sai). Bị trừ 100 điểm.
                 </p>
                 <span className="text-[11px] text-gray-500 block mt-1">
                   Bình chọn sẽ tự động khóa đúng vào giờ kickoff của trận đấu!

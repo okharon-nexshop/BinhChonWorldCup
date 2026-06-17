@@ -114,17 +114,19 @@ export default function Leaderboard({ currentUser }) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/5 bg-black/20 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  <th className="py-4 px-6 text-center w-16">Hạng</th>
-                  <th className="py-4 px-6">Thành viên</th>
-                  <th className="py-4 px-6 text-center">Đoán đúng</th>
-                  <th className="py-4 px-6 text-center">Đoán sai</th>
-                  <th className="py-4 px-6 text-center">Không dự đoán</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6 text-center w-12 sm:w-16">Hạng</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6">Thành viên</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6 text-center">Điểm</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6 text-center hide-mobile">Tỷ số</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6 text-center">Đúng</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6 text-center">Sai</th>
+                  <th className="py-3 px-2 sm:py-4 sm:px-6 text-center hide-xs">Bỏ lỡ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-sm">
+              <tbody className="divide-y divide-white/5 text-xs sm:text-sm">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-12 text-gray-500 italic">
+                    <td colSpan="7" className="text-center py-12 text-gray-500 italic">
                       Không tìm thấy thành viên nào
                     </td>
                   </tr>
@@ -149,30 +151,38 @@ export default function Leaderboard({ currentUser }) {
                         className={`hover:bg-emerald-500/[0.02] cursor-pointer transition ${isSelf ? 'bg-emerald-500/[0.04] font-medium' : ''}`}
                       >
                         {/* Rank */}
-                        <td className="py-4 px-6 text-center font-bold">
-                          {rankBadge ? <span className="text-xl">{rankBadge}</span> : rankText}
+                        <td className="py-3 px-2 sm:py-4 sm:px-6 text-center font-bold">
+                          {rankBadge ? <span className="text-base sm:text-xl">{rankBadge}</span> : rankText}
                         </td>
                         
                         {/* Name */}
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-2 sm:py-4 sm:px-6">
                           <div className="flex flex-col">
-                            <span className={`text-gray-100 ${isSelf ? 'text-emerald-400 font-semibold' : ''}`}>
-                              {user.displayName} {isSelf && <span className="text-xs text-gray-500 font-normal">(Bạn)</span>}
+                            <span className={`text-gray-100 text-xs sm:text-sm ${isSelf ? 'text-emerald-400 font-semibold' : ''}`}>
+                              {user.displayName} {isSelf && <span className="text-[10px] text-gray-500 font-normal sm:inline hidden">(Bạn)</span>}
                             </span>
-                            <span className="text-xs text-gray-500">@{user.username}</span>
+                            <span className="text-[10px] sm:text-xs text-gray-500">@{user.username}</span>
                           </div>
                         </td>
 
+                        {/* Điểm */}
+                        <td className="py-3 px-2 sm:py-4 sm:px-6 text-center text-cyan-400 font-bold font-mono text-xs sm:text-sm">
+                          {user.balance >= 0 ? '+' : ''}{user.balance}
+                        </td>
 
+                        {/* Trúng tỷ số */}
+                        <td className="py-3 px-2 sm:py-4 sm:px-6 text-center text-amber-400 font-bold font-mono text-xs sm:text-sm hide-mobile">
+                          {user.correctScores}
+                        </td>
 
-                        {/* Stats */}
-                        <td className="py-4 px-6 text-center text-emerald-400 font-bold font-mono">
+                        {/* Đúng kết quả + tỷ số */}
+                        <td className="py-3 px-2 sm:py-4 sm:px-6 text-center text-emerald-400 font-bold font-mono text-xs sm:text-sm">
                           {user.correctScores + user.correctOutcomes}
                         </td>
-                        <td className="py-4 px-6 text-center text-red-400 font-bold font-mono">
+                        <td className="py-3 px-2 sm:py-4 sm:px-6 text-center text-red-400 font-bold font-mono text-xs sm:text-sm">
                           {user.wrongOutcomes}
                         </td>
-                        <td className="py-4 px-6 text-center text-gray-500 font-bold font-mono">
+                        <td className="py-3 px-2 sm:py-4 sm:px-6 text-center text-gray-500 font-bold font-mono text-xs sm:text-sm hide-xs">
                           {user.missed}
                         </td>
                       </tr>
@@ -217,7 +227,13 @@ export default function Leaderboard({ currentUser }) {
               ) : userDetail ? (
                 <div className="space-y-3">
                   {/* Summary Stats inside Modal */}
-                  <div className="grid grid-cols-3 gap-2 text-center bg-white/5 p-3 rounded-xl border border-white/5 text-xs">
+                  <div className="grid grid-cols-4 gap-2 text-center bg-white/5 p-3 rounded-xl border border-white/5 text-xs">
+                    <div>
+                      <span className="text-gray-500 block">Điểm số</span>
+                      <span className="font-bold text-cyan-400 font-mono">
+                        {selectedUser.balance >= 0 ? '+' : ''}{selectedUser.balance}
+                      </span>
+                    </div>
                     <div>
                       <span className="text-gray-500 block">Đoán đúng</span>
                       <span className="font-bold text-emerald-400 font-mono">
@@ -231,7 +247,7 @@ export default function Leaderboard({ currentUser }) {
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-500 block">Không dự đoán</span>
+                      <span className="text-gray-500 block">Bỏ lỡ</span>
                       <span className="font-bold text-gray-400 font-mono">
                         {selectedUser.missed}
                       </span>

@@ -82,8 +82,32 @@ h1, h2, h3, h4, h5, h6 {
 .gap-4 { gap: 16px; }
 .gap-6 { gap: 24px; }
 
+@media (min-width: 640px) {
+  .sm\:block { display: block !important; }
+  .sm\:inline { display: inline !important; }
+  .sm\:flex { display: flex !important; }
+  .sm\:hidden { display: none !important; }
+  .sm\:text-xs { font-size: 0.75rem !important; }
+  .sm\:text-sm { font-size: 0.875rem !important; }
+  .sm\:p-8 { padding: 32px !important; }
+  .sm\:px-4 { padding-left: 16px !important; padding-right: 16px !important; }
+  .sm\:py-8 { padding-top: 32px !important; padding-bottom: 32px !important; }
+  .sm\:gap-3 { gap: 12px !important; }
+  .sm\:gap-4 { gap: 16px !important; }
+  .sm\:px-6 { padding-left: 24px !important; padding-right: 24px !important; }
+  .sm\:w-auto { width: auto !important; }
+  .sm\:w-64 { width: 256px !important; }
+  .sm\:flex-row { flex-direction: row !important; }
+  .sm\:items-center { align-items: center !important; }
+  .sm\:justify-start { justify-content: flex-start !important; }
+  .sm\:py-1\.5 { padding-top: 6px !important; padding-bottom: 6px !important; }
+}
+
 @media (min-width: 768px) {
-  .md\:flex-row { flex-direction: row; }
+  .md\:flex { display: flex !important; }
+  .md\:hidden { display: none !important; }
+  .md\:block { display: block !important; }
+  .md\:flex-row { flex-direction: row !important; }
 }
 
 /* Custom Scrollbar */
@@ -264,7 +288,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Emojis flags size (compact single line) */
 .flag-inline {
-  font-size: 4.5rem;
+  font-size: 2.25rem;
   line-height: 1;
   display: inline-block;
   vertical-align: middle;
@@ -273,7 +297,7 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (min-width: 640px) {
   .flag-inline {
-    font-size: 5.6rem;
+    font-size: 2.75rem;
   }
 }
 
@@ -854,6 +878,117 @@ h1, h2, h3, h4, h5, h6 {
 /* Override fixed match-node width for group stage list */
 .group-stage-matches .match-node {
   width: 100%;
+}
+
+/* Mobile Bottom Navigation Bar styling */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(4, 11, 7, 0.94);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 4px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    height: calc(56px + env(safe-area-inset-bottom));
+    z-index: 1000;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+  }
+  
+  .mobile-bottom-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    flex: 1;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+  
+  .mobile-bottom-nav-btn.active {
+    color: var(--color-green);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+  }
+
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom)); /* Ensure content is not cut off by bottom nav */
+  }
+
+  /* Make mobile layout content padding slightly smaller */
+  main {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* Missing utility classes for custom Tailwind classes used in JSX */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+.p-5 {
+  padding: 20px;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.z-\[999\] {
+  z-index: 999;
+}
+
+.z-\[9999\] {
+  z-index: 9999;
+}
+
+.blur-3xl {
+  filter: blur(64px);
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.shadow-inner {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .hide-xs {
+    display: none !important;
+  }
 }
 
 
