@@ -71,6 +71,12 @@ export function getCountryEmoji(teamName) {
 
 function MatchCard({ match, onSavePrediction, today, tomorrow }) {
   const { id, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
+  const isLive = (() => {
+    if (!match.datetime) return false;
+    const kickoff = new Date(match.datetime).getTime();
+    const now = Date.now();
+    return now >= kickoff && now <= kickoff + 2.5 * 60 * 60 * 1000;
+  })();
   
   // Local state for goals, initialized with prediction values or empty string for easy typing
   const [predHome, setPredHome] = useState(prediction ? String(prediction.predictHome) : '');
@@ -166,13 +172,20 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
   }, [isExact]);
 
   return (
-    <div className={`match-card ${isLocked ? 'opacity-90' : ''}`}>
+    <div className={`match-card ${isLive ? 'live-match' : ''} ${isLocked && !isLive ? 'opacity-90' : ''}`}>
       
       {/* 1. TOP ROW: TIME / DATE (Thời gian - Ngày to lên & Bảng đấu) */}
       <div className="match-card-header-centered">
-        <span className="text-base font-bold text-emerald-400 glow-text font-mono">
-          📅 {date} • {time}
-        </span>
+        {isLive ? (
+          <div className="live-badge">
+            <span className="live-pulse-dot"></span>
+            <span>Trực Tiếp</span>
+          </div>
+        ) : (
+          <span className="text-base font-bold text-emerald-400 glow-text font-mono">
+            📅 {date} • {time}
+          </span>
+        )}
         <span className="badge badge-scheduled text-[9px] py-0.5 px-2 bg-white/5 border border-white/5 text-gray-400 font-semibold mt-1">
           {group}
         </span>
@@ -320,12 +333,39 @@ export default function MatchList({ matches, onSavePrediction }) {
     return `${day}/${month}`;
   })();
 
-  const [filter, setFilter] = useState('open_voting'); // Default is 'open_voting'!
+  const [filter, setFilter] = useState('dashboard'); // Default is 'dashboard'!
 
-  // Filter matches:
-  // - 'open_voting': Matches of today OR tomorrow that are NOT locked.
-  // - 'played': All matches that are locked or finished.
-  // - 'upcoming': Matches scheduled for days after tomorrow.
+  const now = new Date();
+
+  // 1. Live Matches: kickoff <= now <= kickoff + 2.5 hours
+  const liveMatches = matches.filter(m => {
+    if (!m.datetime) return false;
+    const kickoff = new Date(m.datetime);
+    return now >= kickoff && now <= new Date(kickoff.getTime() + 2.5 * 60 * 60 * 1000);
+  });
+
+  // 2. Upcoming Matches: kickoff > now
+  // Sort them chronologically (ascending)
+  const upcomingMatches = matches.filter(m => {
+    if (!m.datetime) return false;
+    const kickoff = new Date(m.datetime);
+    return kickoff > now;
+  }).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+  const nextUpcoming = upcomingMatches.slice(0, 6);
+
+  // 3. Recent Matches (Played): kickoff < now - 2.5 hours or has scores
+  // Sort them descending (most recently finished first)
+  const recentMatches = matches.filter(m => {
+    if (!m.datetime) return false;
+    const kickoff = new Date(m.datetime);
+    const hasScore = m.scoreHome !== null && m.scoreAway !== null;
+    return hasScore || (kickoff < now && now > new Date(kickoff.getTime() + 2.5 * 60 * 60 * 1000));
+  }).sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+  const lastRecent = recentMatches.slice(0, 3);
+
+  // Filter matches for standard lists:
   const filteredMatches = matches.filter(m => {
     if (filter === 'open_voting') {
       return (m.date === today || m.date === tomorrow) && !m.isLocked;
@@ -400,7 +440,14 @@ export default function MatchList({ matches, onSavePrediction }) {
           Bình Chọn Trận Đấu
         </h2>
         
-        <div className="tabs-container w-full sm:w-auto">
+        <div className="tabs-container w-full sm:w-auto flex-wrap">
+          <button
+            type="button"
+            className={`tab-btn text-xs ${filter === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setFilter('dashboard')}
+          >
+            📊 Dashboard
+          </button>
           <button
             type="button"
             className={`tab-btn text-xs ${filter === 'open_voting' ? 'active' : ''}`}
@@ -425,42 +472,145 @@ export default function MatchList({ matches, onSavePrediction }) {
         </div>
       </div>
 
-      {/* Matches List Grouped by Date */}
-      {sortedDates.length === 0 ? (
-        <div className="glass-panel p-12 text-center text-gray-400 max-w-3xl mx-auto border-dashed">
-          <HelpCircle size={40} className="mx-auto text-gray-600 mb-3" />
-          <p className="text-sm font-medium leading-relaxed">{getEmptyMessage()}</p>
+      {/* Matches List Grouped by Date or Dashboard Panels */}
+      {filter === 'dashboard' ? (
+        <div className="space-y-8">
+          {/* 1. LIVE matches */}
+          {liveMatches.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-px bg-red-500/20 flex-grow"></div>
+                <h3 className="dashboard-section-title text-red-400">
+                  🔴 Trận đấu đang diễn ra (LIVE)
+                </h3>
+                <div className="h-px bg-red-500/20 flex-grow"></div>
+              </div>
+              <div className="live-matches-container">
+                {liveMatches.map(match => (
+                  <MatchCard
+                    key={match.id}
+                    match={match}
+                    onSavePrediction={onSavePrediction}
+                    today={today}
+                    tomorrow={tomorrow}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 2. Upcoming matches */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-px bg-emerald-500/20 flex-grow"></div>
+              <h3 className="dashboard-section-title text-emerald-400">
+                📅 Trận đấu sắp diễn ra
+              </h3>
+              <div className="h-px bg-emerald-500/20 flex-grow"></div>
+            </div>
+            {nextUpcoming.length === 0 ? (
+              <p className="text-sm text-gray-500 italic text-center py-6 bg-white/5 rounded-2xl border border-white/5 border-dashed">
+                Không có trận đấu sắp tới nào.
+              </p>
+            ) : (
+              <div className="matches-grid">
+                {nextUpcoming.map(match => (
+                  <MatchCard
+                    key={match.id}
+                    match={match}
+                    onSavePrediction={onSavePrediction}
+                    today={today}
+                    tomorrow={tomorrow}
+                  />
+                ))}
+              </div>
+            )}
+            {upcomingMatches.length > 6 && (
+              <div className="text-center mt-3">
+                <button
+                  type="button"
+                  className="btn btn-secondary text-xs px-4 py-2 rounded-xl"
+                  onClick={() => setFilter('upcoming')}
+                >
+                  Xem tất cả trận sắp tới ({upcomingMatches.length}) →
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Recent results */}
+          {lastRecent.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-px bg-cyan-500/20 flex-grow"></div>
+                <h3 className="dashboard-section-title text-cyan-400">
+                  🏁 Kết quả gần đây
+                </h3>
+                <div className="h-px bg-cyan-500/20 flex-grow"></div>
+              </div>
+              <div className="matches-grid">
+                {lastRecent.map(match => (
+                  <MatchCard
+                    key={match.id}
+                    match={match}
+                    onSavePrediction={onSavePrediction}
+                    today={today}
+                    tomorrow={tomorrow}
+                  />
+                ))}
+              </div>
+              {recentMatches.length > 3 && (
+                <div className="text-center mt-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-xs px-4 py-2 rounded-xl"
+                    onClick={() => setFilter('played')}
+                  >
+                    Xem lịch sử đầy đủ →
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ) : (
-        <div className="space-y-6">
-          {sortedDates.map(dateStr => {
-            const matchesInDay = groupedMatches[dateStr];
-            
-            return (
-              <div key={dateStr} className="space-y-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-px bg-emerald-500/10 flex-grow"></div>
-                  <h3 className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                    📅 Ngày {dateStr} {dateStr === today ? '(Hôm nay)' : dateStr === tomorrow ? '(Ngày mai)' : ''}
-                  </h3>
-                  <div className="h-px bg-emerald-500/10 flex-grow"></div>
-                </div>
+        /* Original Grouped Matches List */
+        sortedDates.length === 0 ? (
+          <div className="glass-panel p-12 text-center text-gray-400 max-w-3xl mx-auto border-dashed">
+            <HelpCircle size={40} className="mx-auto text-gray-600 mb-3" />
+            <p className="text-sm font-medium leading-relaxed">{getEmptyMessage()}</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {sortedDates.map(dateStr => {
+              const matchesInDay = groupedMatches[dateStr];
+              
+              return (
+                <div key={dateStr} className="space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-px bg-emerald-500/10 flex-grow"></div>
+                    <h3 className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                      📅 Ngày {dateStr} {dateStr === today ? '(Hôm nay)' : dateStr === tomorrow ? '(Ngày mai)' : ''}
+                    </h3>
+                    <div className="h-px bg-emerald-500/10 flex-grow"></div>
+                  </div>
 
-                <div className="matches-grid">
-                  {matchesInDay.map(match => (
-                    <MatchCard
-                      key={match.id}
-                      match={match}
-                      onSavePrediction={onSavePrediction}
-                      today={today}
-                      tomorrow={tomorrow}
-                    />
-                  ))}
+                  <div className="matches-grid">
+                    {matchesInDay.map(match => (
+                      <MatchCard
+                        key={match.id}
+                        match={match}
+                        onSavePrediction={onSavePrediction}
+                        today={today}
+                        tomorrow={tomorrow}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )
       )}
     </div>
   );

@@ -426,9 +426,17 @@ export async function autoUpdateScores(db, force = false) {
   }
   
   const now = Date.now();
-  const TEN_MINUTES = 10 * 60 * 1000;
   
-  if (!force && db.settings.lastAutoUpdateTimestamp && (now - db.settings.lastAutoUpdateTimestamp < TEN_MINUTES)) {
+  // Check if any match is currently "live" (started, within 2.5 hours, and score not yet confirmed)
+  const hasLiveMatch = Array.isArray(db.matches) && db.matches.some(m => {
+    if (!m.datetime || m.scoreHome !== null) return false;
+    const kickoff = new Date(m.datetime).getTime();
+    return now >= kickoff && now <= kickoff + 2.5 * 60 * 60 * 1000;
+  });
+
+  const refreshInterval = hasLiveMatch ? 60 * 1000 : 10 * 60 * 1000; // 1 min if live, 10 mins otherwise
+  
+  if (!force && db.settings.lastAutoUpdateTimestamp && (now - db.settings.lastAutoUpdateTimestamp < refreshInterval)) {
     return { db, updated: false };
   }
   

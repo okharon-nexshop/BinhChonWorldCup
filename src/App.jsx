@@ -91,6 +91,8 @@ export default function App() {
   useEffect(() => {
     if (user) {
       fetchCoreData();
+      const intervalId = setInterval(fetchCoreData, 30000); // Poll every 30 seconds
+      return () => clearInterval(intervalId);
     }
   }, [user]);
 
