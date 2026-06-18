@@ -414,37 +414,37 @@ export default function App() {
           </div>
 
           {activeTab === 'matches' && congratulations && (
-            <div className="glass-panel relative border border-amber-500/20 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 p-4 sm:p-5 overflow-hidden rounded-2xl animate-fade-in shadow-lg mb-6">
+            <div className="glass-panel relative border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-transparent to-amber-500/10 p-5 sm:p-6 overflow-hidden rounded-2xl animate-fade-in shadow-2xl mb-6">
               {/* Soft gold glow */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.04)_0%,transparent_70%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.06)_0%,transparent_70%)] pointer-events-none" />
               
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between relative z-10">
+              <div className="flex flex-col md:flex-row gap-5 items-center justify-between relative z-10">
                 <div className="text-center md:text-left flex-grow">
-                  <h3 className="text-sm font-extrabold tracking-wider text-amber-400 flex items-center justify-center md:justify-start gap-1.5 uppercase">
-                    🏆 Bảng Vàng Tiên Tri (Ngày {congratulations.recentDate})
+                  <h3 className="text-base sm:text-lg font-black tracking-wide text-amber-400 flex items-center justify-center md:justify-start gap-2 uppercase animate-pulse">
+                    🔥 THẦN TIÊN TRI HIỂN LINH! (Ngày {congratulations.recentDate}) 🏆
                   </h3>
-                  <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                    Chúc mừng anh em đã dự đoán chính xác kết quả các trận đấu gần nhất:{" "}
-                    <span className="text-gray-300 font-semibold">
+                  <p className="text-xs sm:text-sm text-gray-300 mt-2 leading-relaxed">
+                    Góc bái phục! Những "nhà tiên tri vũ trụ" dưới đây đã phán như thần, ăn trọn điểm các trận đấu vừa qua:{" "}
+                    <span className="text-amber-300 font-extrabold underline decoration-amber-500/40">
                       {congratulations.matches.map(m => `${m.teamHome} ${m.scoreHome}-${m.scoreAway} ${m.teamAway}`).join(', ')}
                     </span>
                   </p>
                   
                   {/* Winners list */}
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-4 space-y-3">
                     {congratulations.exactWinners.length > 0 && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 text-xs">
-                        <span className="font-bold text-amber-300 flex items-center gap-1 min-w-[90px] shrink-0">
-                          👑 Vua Tiên Tri:
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm">
+                        <span className="font-bold text-amber-300 flex items-center gap-1 min-w-[150px] shrink-0">
+                          👑 Vua Tiên Tri (Ăn tỷ số):
                         </span>
                         <div className="flex flex-wrap justify-center sm:justify-start gap-1.5">
                           {congratulations.exactWinners.map((w, idx) => (
                             <span 
                               key={idx} 
-                              className="px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 font-medium font-mono text-[11px]"
+                              className="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-100 font-bold font-mono text-[11px] sm:text-xs shadow-[0_0_10px_rgba(245,158,11,0.1)] hover:scale-105 transition-all duration-150"
                               title={`Đoán đúng tỷ số ${w.predictionText} trận ${w.matchName}`}
                             >
-                              @{w.username} ({w.displayName})
+                              @${w.username} (${w.displayName})
                             </span>
                           ))}
                         </div>
@@ -452,18 +452,18 @@ export default function App() {
                     )}
                     
                     {congratulations.outcomeWinners.length > 0 && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 text-xs">
-                        <span className="font-bold text-emerald-400 flex items-center gap-1 min-w-[90px] shrink-0">
-                          ⭐ Thần Đoán:
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm">
+                        <span className="font-bold text-emerald-400 flex items-center gap-1 min-w-[150px] shrink-0">
+                          ⚡ Thần Đoán (Trúng hướng):
                         </span>
                         <div className="flex flex-wrap justify-center sm:justify-start gap-1.5">
                           {congratulations.outcomeWinners.map((w, idx) => (
                             <span 
                               key={idx} 
-                              className="px-2 py-0.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-emerald-300 text-[11px]"
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 font-medium text-[11px] sm:text-xs hover:scale-105 transition-all duration-150"
                               title={`Đoán đúng kết quả trận ${w.matchName}`}
                             >
-                              @{w.username} ({w.displayName})
+                              @${w.username} (${w.displayName})
                             </span>
                           ))}
                         </div>
@@ -471,14 +471,16 @@ export default function App() {
                     )}
 
                     {congratulations.exactWinners.length === 0 && congratulations.outcomeWinners.length === 0 && (
-                      <p className="text-[11px] text-gray-500 italic">Hôm đó không có ai đoán trúng kết quả trận nào.</p>
+                      <p className="text-xs sm:text-sm text-gray-500 italic flex items-center gap-1.5 justify-center md:justify-start">
+                        😭 Hôm đó không ai đoán trúng gì... Cả làng cùng dắt tay nhau "xa bờ"! 🤡
+                      </p>
                     )}
                   </div>
                 </div>
 
                 {/* Decorative trophy icon */}
-                <div className="hidden md:flex w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 items-center justify-center text-xl text-amber-400 shrink-0 shadow-inner">
-                  👑
+                <div className="hidden md:flex w-14 h-14 rounded-full bg-amber-500/10 border-2 border-amber-500/30 items-center justify-center text-2xl text-amber-400 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.15)] animate-bounce">
+                  🏆
                 </div>
               </div>
             </div>
