@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trophy, ArrowLeft, Loader, Search, RefreshCw, X, Lock } from 'lucide-react';
 import { getCountryEmoji } from './MatchList';
 
-export default function Leaderboard({ currentUser }) {
+export default function Leaderboard({ currentUser, onFlagClick }) {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [poolBalance, setPoolBalance] = useState(0);
@@ -299,12 +299,12 @@ export default function Leaderboard({ currentUser }) {
                             </div>
                             <div className="flex items-center gap-2 mt-1.5">
                               <span className="text-sm font-semibold truncate flex items-center gap-1">
-                                <span className="text-base">{getCountryEmoji(m.teamHome)}</span>
+                                <span className="text-base">{getCountryEmoji(m.teamHome, onFlagClick)}</span>
                                 {m.teamHome}
                               </span>
                               <span className="text-xs text-gray-500 font-bold">vs</span>
                               <span className="text-sm font-semibold truncate flex items-center gap-1">
-                                <span className="text-base">{getCountryEmoji(m.teamAway)}</span>
+                                <span className="text-base">{getCountryEmoji(m.teamAway, onFlagClick)}</span>
                                 {m.teamAway}
                               </span>
                             </div>

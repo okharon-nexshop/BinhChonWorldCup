@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, Unlock, Calendar, Trophy, X, Save, Check, ShieldAlert } from 'lucide-react';
 import { getCountryEmoji } from './MatchList';
+import { getAiPrediction } from '../utils/aiPredictor';
 
 // Helper to format placeholder team names into friendly Vietnamese
 function getFriendlyTeamName(teamName) {
@@ -26,7 +27,7 @@ function isPlaceholder(teamName) {
 }
 
 // Individual Match Node in the Bracket
-function MatchNode({ match, onClick, today, tomorrow }) {
+function MatchNode({ match, onClick, today, tomorrow, onFlagClick }) {
   const { id, num, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
 
   const hasVoted = prediction !== null;
@@ -81,7 +82,7 @@ function MatchNode({ match, onClick, today, tomorrow }) {
       {/* Team Home */}
       <div className={`match-node-team ${homeWinner ? 'winner' : scoreHome !== null ? 'loser' : ''}`}>
         <div className="match-node-team-info">
-          <span className="text-sm sm:text-base">{getCountryEmoji(teamHome)}</span>
+          <span className="text-sm sm:text-base">{getCountryEmoji(teamHome, onFlagClick)}</span>
           <span className="truncate max-w-[140px] font-semibold text-xs sm:text-sm">{getFriendlyTeamName(teamHome)}</span>
         </div>
         <span className="match-node-score font-bold font-mono text-xs sm:text-sm">
@@ -92,7 +93,7 @@ function MatchNode({ match, onClick, today, tomorrow }) {
       {/* Team Away */}
       <div className={`match-node-team ${awayWinner ? 'winner' : scoreAway !== null ? 'loser' : ''}`}>
         <div className="match-node-team-info">
-          <span className="text-sm sm:text-base">{getCountryEmoji(teamAway)}</span>
+          <span className="text-sm sm:text-base">{getCountryEmoji(teamAway, onFlagClick)}</span>
           <span className="truncate max-w-[140px] font-semibold text-xs sm:text-sm">{getFriendlyTeamName(teamAway)}</span>
         </div>
         <span className="match-node-score font-bold font-mono text-xs sm:text-sm">
@@ -111,7 +112,7 @@ function MatchNode({ match, onClick, today, tomorrow }) {
 }
 
 // Dynamic standings calculator for a group
-function getGroupStandings(groupMatches) {
+export function getGroupStandings(groupMatches) {
   const standings = {};
 
   // Initialize teams from match list
@@ -170,7 +171,28 @@ function getGroupStandings(groupMatches) {
 }
 
 // Main Tournament Bracket Component
-export default function TournamentBracket({ matches, onSavePrediction }) {
+// Simple markdown parser helper for AI analysis text
+function renderAnalysis(text) {
+  if (!text) return null;
+  return text.split('\n').map((line, i) => {
+    if (line.trim().startsWith('- ')) {
+      const parts = line.replace('- ', '').split('**');
+      return (
+        <li key={i} className="text-xs text-gray-300 ml-4 list-disc mt-1">
+          {parts.map((part, idx) => idx % 2 === 1 ? <strong key={idx} className="text-white">{part}</strong> : part)}
+        </li>
+      );
+    }
+    const parts = line.split('**');
+    return (
+      <p key={i} className="text-xs text-gray-300 mt-1.5">
+        {parts.map((part, idx) => idx % 2 === 1 ? <strong key={idx} className="text-emerald-400">{part}</strong> : part)}
+      </p>
+    );
+  });
+}
+
+export default function TournamentBracket({ matches, onSavePrediction, onFlagClick }) {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [activeMobileTab, setActiveMobileTab] = useState('r32'); // 'r32', 'r16', 'qf', 'sf', 'final'
   const [bracketMode, setBracketMode] = useState('group'); // 'group' or 'knockout'
@@ -186,6 +208,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
   const [predAway, setPredAway] = useState('');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showAiModal, setShowAiModal] = useState(false);
 
   // Compute today & tomorrow in GMT+7 for open voting checks
   const today = (() => {
@@ -301,6 +324,17 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
     }
   };
 
+  const renderMatchNode = (m) => (
+    <MatchNode 
+      key={m.id} 
+      match={m} 
+      onClick={handleNodeClick} 
+      today={today} 
+      tomorrow={tomorrow} 
+      onFlagClick={onFlagClick}
+    />
+  );
+
   return (
     <div className="space-y-6">
       {/* Title section */}
@@ -399,7 +433,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                                 </span>
                               </td>
                               <td className="py-2.5 px-1.5 font-semibold text-white flex items-center gap-1.5 whitespace-nowrap">
-                                <span className="text-sm sm:text-base">{getCountryEmoji(team.name)}</span>
+                                <span className="text-sm sm:text-base">{getCountryEmoji(team.name, onFlagClick)}</span>
                                 <span className="truncate max-w-[85px] sm:max-w-[120px]">{team.name}</span>
                               </td>
                               <td className="py-2.5 px-1.5 text-center font-bold font-mono text-gray-300">{team.played}</td>
@@ -421,15 +455,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                     ⚽ Trận Đấu & Bình Chọn
                   </h4>
                   <div className="flex flex-col gap-2 group-stage-matches">
-                    {groupMatches.map(m => (
-                      <MatchNode 
-                        key={m.id} 
-                        match={m} 
-                        onClick={handleNodeClick} 
-                        today={today} 
-                        tomorrow={tomorrow} 
-                      />
-                    ))}
+                    {groupMatches.map(renderMatchNode)}
                   </div>
                 </div>
               </div>
@@ -449,9 +475,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Vòng 32</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {leftR32.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {leftR32.map(renderMatchNode)}
                   </div>
                 </div>
 
@@ -459,9 +483,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Vòng 16</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {leftR16.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {leftR16.map(renderMatchNode)}
                   </div>
                 </div>
 
@@ -469,9 +491,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Tứ Kết</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {leftQF.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {leftQF.map(renderMatchNode)}
                   </div>
                 </div>
 
@@ -479,9 +499,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Bán Kết</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {leftSF.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {leftSF.map(renderMatchNode)}
                   </div>
                 </div>
               </div>
@@ -499,7 +517,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                     <span className="text-[10px] text-amber-400 font-extrabold tracking-widest uppercase block">Nhà Vô Địch</span>
                     {champion ? (
                       <div className="text-lg font-black text-white flex items-center justify-center gap-1.5 mt-1 animate-pulse">
-                        {getCountryEmoji(champion)} {champion}
+                        {getCountryEmoji(champion, onFlagClick)} {champion}
                       </div>
                     ) : (
                       <div className="text-xs font-semibold text-gray-500 italic mt-1">Chưa Xác Định</div>
@@ -510,17 +528,13 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 {/* Final Match Node */}
                 <div className="w-full">
                   <div className="bracket-round-header border-amber-500/10 text-amber-400">Chung Kết</div>
-                  {finalMatch && (
-                    <MatchNode match={finalMatch} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  )}
+                  {finalMatch && renderMatchNode(finalMatch)}
                 </div>
 
                 {/* Third Place Match Node */}
                 <div className="w-full">
                   <div className="bracket-round-header">Tranh Hạng Ba</div>
-                  {thirdPlaceMatch && (
-                    <MatchNode match={thirdPlaceMatch} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  )}
+                  {thirdPlaceMatch && renderMatchNode(thirdPlaceMatch)}
                 </div>
 
               </div>
@@ -531,9 +545,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Bán Kết</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {rightSF.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {rightSF.map(renderMatchNode)}
                   </div>
                 </div>
 
@@ -541,9 +553,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Tứ Kết</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {rightQF.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {rightQF.map(renderMatchNode)}
                   </div>
                 </div>
 
@@ -551,9 +561,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Vòng 16</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {rightR16.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {rightR16.map(renderMatchNode)}
                   </div>
                 </div>
 
@@ -561,9 +569,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                 <div className="flex flex-col justify-around h-full">
                   <div className="bracket-round-header">Vòng 32</div>
                   <div className="flex-grow flex flex-col justify-around">
-                    {rightR32.map(m => (
-                      <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    ))}
+                    {rightR32.map(renderMatchNode)}
                   </div>
                 </div>
               </div>
@@ -617,52 +623,36 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
               {activeMobileTab === 'r32' && (
                 <>
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
-                  {leftR32.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {leftR32.map(renderMatchNode)}
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
-                  {rightR32.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {rightR32.map(renderMatchNode)}
                 </>
               )}
 
               {activeMobileTab === 'r16' && (
                 <>
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
-                  {leftR16.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {leftR16.map(renderMatchNode)}
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
-                  {rightR16.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {rightR16.map(renderMatchNode)}
                 </>
               )}
 
               {activeMobileTab === 'qf' && (
                 <>
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
-                  {leftQF.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {leftQF.map(renderMatchNode)}
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
-                  {rightQF.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {rightQF.map(renderMatchNode)}
                 </>
               )}
 
               {activeMobileTab === 'sf' && (
                 <>
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Trận 1 (Nhánh Trái):</div>
-                  {leftSF.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {leftSF.map(renderMatchNode)}
                   <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Trận 2 (Nhánh Phải):</div>
-                  {rightSF.map(m => (
-                    <MatchNode key={m.id} match={m} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                  ))}
+                  {rightSF.map(renderMatchNode)}
                 </>
               )}
 
@@ -673,7 +663,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                     <span className="text-[9px] text-amber-400 font-extrabold tracking-widest uppercase">Nhà Vô Địch 🏆</span>
                     {champion ? (
                       <div className="text-sm font-black text-white flex items-center gap-1 mt-0.5">
-                        {getCountryEmoji(champion)} {champion}
+                        {getCountryEmoji(champion, onFlagClick)} {champion}
                       </div>
                     ) : (
                       <div className="text-xs font-semibold text-gray-500 italic">Chưa Xác Định</div>
@@ -682,14 +672,10 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
 
                   <div className="w-full flex flex-col items-center gap-3">
                     <div className="text-[10px] text-amber-400 font-extrabold uppercase self-start pl-2">Chung Kết:</div>
-                    {finalMatch && (
-                      <MatchNode match={finalMatch} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    )}
+                    {finalMatch && renderMatchNode(finalMatch)}
 
                     <div className="text-[10px] text-gray-500 font-extrabold uppercase self-start pl-2 mt-2">Tranh Hạng Ba:</div>
-                    {thirdPlaceMatch && (
-                      <MatchNode match={thirdPlaceMatch} onClick={handleNodeClick} today={today} tomorrow={tomorrow} />
-                    )}
+                    {thirdPlaceMatch && renderMatchNode(thirdPlaceMatch)}
                   </div>
                 </div>
               )}
@@ -736,7 +722,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
             <div className="bg-black/30 p-3.5 rounded-xl border border-white/5 mb-4 space-y-2.5">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold text-gray-300 flex items-center gap-1.5">
-                  {getCountryEmoji(selectedMatch.teamHome)} {getFriendlyTeamName(selectedMatch.teamHome)}
+                  {getCountryEmoji(selectedMatch.teamHome, onFlagClick)} {getFriendlyTeamName(selectedMatch.teamHome)}
                 </span>
                 <span className="font-bold text-gray-400 font-mono">
                   {selectedMatch.scoreHome !== null ? `Thực tế: ${selectedMatch.scoreHome}` : ''}
@@ -744,7 +730,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold text-gray-300 flex items-center gap-1.5">
-                  {getCountryEmoji(selectedMatch.teamAway)} {getFriendlyTeamName(selectedMatch.teamAway)}
+                  {getCountryEmoji(selectedMatch.teamAway, onFlagClick)} {getFriendlyTeamName(selectedMatch.teamAway)}
                 </span>
                 <span className="font-bold text-gray-400 font-mono">
                   {selectedMatch.scoreAway !== null ? `Thực tế: ${selectedMatch.scoreAway}` : ''}
@@ -759,7 +745,7 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
               if (selectedMatch.scoreHome !== null && selectedMatch.scoreAway !== null) {
                 // Completed match info view
                 return (
-                  <div className="text-center p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-gray-400 space-y-1.5">
+                  <div className="text-center p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-gray-400 space-y-1.5 w-full">
                     <p className="font-medium text-gray-300">Trận đấu đã kết thúc với tỷ số:</p>
                     <p className="text-lg font-extrabold text-white font-mono">{selectedMatch.scoreHome} - {selectedMatch.scoreAway}</p>
                     {selectedMatch.prediction ? (
@@ -769,6 +755,14 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                     ) : (
                       <p className="text-[11px] text-red-400 italic mt-1">Bạn đã không bình chọn cho trận này.</p>
                     )}
+                    <a
+                      href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`Highlight ${selectedMatch.teamHome} vs ${selectedMatch.teamAway} World Cup 2026`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary text-xs px-3 py-1.5 flex items-center justify-center gap-1.5 mt-2.5 text-red-400 border-red-500/10 hover:border-red-500/30 w-full font-semibold"
+                    >
+                      📺 Xem Highlight Trận Đấu
+                    </a>
                   </div>
                 );
               }
@@ -843,6 +837,16 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
                         )}
                       </button>
                     </div>
+                    
+                    {!isPlaceholder(selectedMatch.teamHome) && !isPlaceholder(selectedMatch.teamAway) && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary text-xs px-2.5 py-1.5 flex items-center gap-1 w-full justify-center text-emerald-400 hover:text-emerald-300 border-emerald-500/10 hover:border-emerald-500/30 font-semibold"
+                        onClick={() => setShowAiModal(true)}
+                      >
+                        🧠 AI Dự Đoán
+                      </button>
+                    )}
                   </form>
                 );
               }
@@ -856,6 +860,125 @@ export default function TournamentBracket({ matches, onSavePrediction }) {
               );
             })()}
 
+          </div>
+        </div>
+      )}
+
+      {/* AI PREDICTION MODAL OVERLAY */}
+      {showAiModal && selectedMatch && (
+        <div className="modal-backdrop z-[9999]" onClick={() => setShowAiModal(false)}>
+          <div 
+            className="glass-panel w-full max-w-md p-6 relative shadow-2xl border border-white/10 rounded-2xl bg-[#0c1410]/95 text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              type="button"
+              onClick={() => setShowAiModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-xl">🧠</span>
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">AI Dự Đoán Kết Quả</h3>
+                <p className="text-[10px] text-gray-400 font-mono mt-0.5">Poisson Model & Head-to-Head Stats</p>
+              </div>
+            </div>
+
+            {(() => {
+              const aiPrediction = getAiPrediction(selectedMatch.teamHome, selectedMatch.teamAway);
+              return (
+                <>
+                  <div className="bg-black/30 p-4 rounded-xl border border-white/5 mb-4 flex justify-between items-center text-center">
+                    <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+                      <span className="flag-inline flex-shrink-0">{getCountryEmoji(selectedMatch.teamHome, onFlagClick)}</span>
+                      <span className="text-xs font-bold text-gray-200 truncate w-full">{selectedMatch.teamHome}</span>
+                    </div>
+                    
+                    <div className="flex flex-col items-center px-4 shrink-0">
+                      <span className="text-[9px] text-gray-500 font-extrabold uppercase bg-white/5 px-2 py-0.5 rounded border border-white/5 mb-1">Dự Đoán Tỷ Số</span>
+                      <span className="text-xl font-black text-emerald-400 glow-text font-mono">
+                        {aiPrediction.suggestedHomeScore} - {aiPrediction.suggestedAwayScore}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+                      <span className="flag-inline flex-shrink-0">{getCountryEmoji(selectedMatch.teamAway, onFlagClick)}</span>
+                      <span className="text-xs font-bold text-gray-200 truncate w-full">{selectedMatch.teamAway}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 mb-4 bg-white/5 p-3.5 rounded-xl border border-white/5">
+                    <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
+                      📊 Tỉ lệ phần trăm kết quả
+                    </h4>
+                    
+                    <div className="w-full h-3.5 rounded-full overflow-hidden flex bg-white/5">
+                      <div 
+                        style={{ width: `${aiPrediction.homeProb}%` }} 
+                        className="bg-emerald-500 h-full flex items-center justify-center text-[8px] font-bold text-black font-mono transition-all duration-500"
+                        title={`${selectedMatch.teamHome} thắng: ${aiPrediction.homeProb}%`}
+                      >
+                        {aiPrediction.homeProb > 15 && `${aiPrediction.homeProb}%`}
+                      </div>
+                      <div 
+                        style={{ width: `${aiPrediction.drawProb}%` }} 
+                        className="bg-gray-500 h-full flex items-center justify-center text-[8px] font-bold text-white font-mono transition-all duration-500"
+                        title={`Hòa: ${aiPrediction.drawProb}%`}
+                      >
+                        {aiPrediction.drawProb > 15 && `${aiPrediction.drawProb}%`}
+                      </div>
+                      <div 
+                        style={{ width: `${aiPrediction.awayProb}%` }} 
+                        className="bg-cyan-500 h-full flex items-center justify-center text-[8px] font-bold text-black font-mono transition-all duration-500"
+                        title={`${selectedMatch.teamAway} thắng: ${aiPrediction.awayProb}%`}
+                      >
+                        {aiPrediction.awayProb > 15 && `${aiPrediction.awayProb}%`}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[9px] font-semibold flex-wrap gap-1">
+                      <span className="text-emerald-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> {selectedMatch.teamHome} ({aiPrediction.homeProb}%)
+                      </span>
+                      <span className="text-gray-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-500 inline-block" /> Hòa ({aiPrediction.drawProb}%)
+                      </span>
+                      <span className="text-cyan-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" /> {selectedMatch.teamAway} ({aiPrediction.awayProb}%)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto bg-black/20 p-3.5 rounded-xl border border-white/5 text-xs text-gray-300 mb-5 scrollbar-premium pr-1 leading-relaxed">
+                    {renderAnalysis(aiPrediction.analysisText)}
+                  </div>
+
+                  <div className="flex gap-2.5">
+                    <button
+                      type="button"
+                      className="btn btn-secondary w-1/3 py-2.5 text-xs"
+                      onClick={() => setShowAiModal(false)}
+                    >
+                      Đóng
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary w-2/3 py-2.5 text-xs font-bold flex items-center justify-center gap-1"
+                      onClick={() => {
+                        setPredHome(String(aiPrediction.suggestedHomeScore));
+                        setPredAway(String(aiPrediction.suggestedAwayScore));
+                        setShowAiModal(false);
+                      }}
+                    >
+                      📝 Áp dụng kết quả ({aiPrediction.suggestedHomeScore} - {aiPrediction.suggestedAwayScore})
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

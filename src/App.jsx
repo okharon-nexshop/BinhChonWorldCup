@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { LogOut, Calendar, Trophy, Shield, HelpCircle, Loader, User, X, Settings, GitFork } from 'lucide-react';
 import Login from './components/Login';
-import MatchList from './components/MatchList';
+import MatchList, { getCountryEmoji } from './components/MatchList';
 import Leaderboard from './components/Leaderboard';
 import Rules from './components/Rules';
 import AdminPanel from './components/AdminPanel';
-import TournamentBracket from './components/TournamentBracket';
+import TournamentBracket, { getGroupStandings } from './components/TournamentBracket';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('matches'); // 'matches', 'leaderboard', 'rules', 'admin'
+  const [activeGroupStandingsTeam, setActiveGroupStandingsTeam] = useState(null);
   
   const [matches, setMatches] = useState([]);
   const [poolBalance, setPoolBalance] = useState(0);
@@ -187,6 +188,11 @@ export default function App() {
     } finally {
       setProfileSaving(false);
     }
+  };
+
+  // Handler for flag click
+  const handleFlagClick = (teamName) => {
+    setActiveGroupStandingsTeam(teamName);
   };
 
   // Callback to save prediction from card
@@ -482,6 +488,7 @@ export default function App() {
             <MatchList 
               matches={matches} 
               onSavePrediction={handleSavePrediction} 
+              onFlagClick={handleFlagClick}
             />
           )}
 
@@ -489,11 +496,12 @@ export default function App() {
             <TournamentBracket 
               matches={matches} 
               onSavePrediction={handleSavePrediction} 
+              onFlagClick={handleFlagClick}
             />
           )}
 
           {activeTab === 'leaderboard' && (
-            <Leaderboard currentUser={user} />
+            <Leaderboard currentUser={user} onFlagClick={handleFlagClick} />
           )}
 
           {activeTab === 'rules' && (
@@ -709,6 +717,147 @@ export default function App() {
           )}
         </nav>
       )}
+
+      {/* GROUP STANDINGS POPUP MODAL */}
+      {(() => {
+        const groupNameForStandings = activeGroupStandingsTeam
+          ? (() => {
+              const match = matches.find(m => 
+                (m.teamHome === activeGroupStandingsTeam || m.teamAway === activeGroupStandingsTeam) && 
+                m.group && 
+                m.group.startsWith('Bảng')
+              );
+              return match ? match.group : null;
+            })()
+          : null;
+
+        const groupMatchesForStandings = groupNameForStandings
+          ? matches.filter(m => m.group === groupNameForStandings)
+          : [];
+
+        const standingsForPopup = groupMatchesForStandings.length > 0
+          ? getGroupStandings(groupMatchesForStandings)
+          : [];
+
+        if (!activeGroupStandingsTeam || !groupNameForStandings || standingsForPopup.length === 0) return null;
+
+        return (
+          <div className="modal-backdrop z-[9999]" onClick={() => setActiveGroupStandingsTeam(null)}>
+            <div 
+              className="glass-panel w-full max-w-lg p-6 relative shadow-2xl border border-white/10 rounded-2xl bg-[#0c1410]/95 text-left"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button 
+                type="button"
+                onClick={() => setActiveGroupStandingsTeam(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              {/* Header */}
+              <div className="mb-4 flex items-center gap-3 border-b border-white/5 pb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xl shadow-inner">
+                  {getCountryEmoji(activeGroupStandingsTeam, handleFlagClick)}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">
+                    Bảng Xếp Hạng - {activeGroupStandingsTeam}
+                  </h3>
+                  <p className="text-xs text-emerald-400 font-bold uppercase tracking-wider font-mono mt-0.5">
+                    {groupNameForStandings} • World Cup 2026
+                  </p>
+                </div>
+              </div>
+
+              {/* Table Standings */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-white/10 text-gray-400 font-mono font-bold uppercase tracking-wider text-[10px] sm:text-xs">
+                      <th className="py-2.5 px-1.5 text-center w-6 sm:w-8">#</th>
+                      <th className="py-2.5 px-1.5">Đội</th>
+                      <th className="py-2.5 px-1.5 text-center w-8 sm:w-10" title="Số trận đã đấu">Tr</th>
+                      <th className="py-2.5 px-1.5 text-center w-8 sm:w-10" title="Hiệu số">HS</th>
+                      <th className="py-2.5 px-1.5 text-center w-10 sm:w-12 text-emerald-400 font-black" title="Điểm">Đ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-xs sm:text-sm">
+                    {standingsForPopup.map((team, idx) => {
+                      const isHighlighted = team.name === activeGroupStandingsTeam;
+                      let rowBg = 'border-white/5';
+                      let rankBg = 'bg-white/5 text-gray-400';
+                      if (idx < 2) {
+                        rowBg = 'border-emerald-500/10 bg-emerald-500/2';
+                        rankBg = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                      } else if (idx === 2) {
+                        rowBg = 'border-blue-500/10 bg-blue-500/2';
+                        rankBg = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+                      } else {
+                        rowBg = 'border-red-500/5 opacity-70';
+                        rankBg = 'bg-red-500/10 text-red-400 border border-red-500/20';
+                      }
+
+                      return (
+                        <tr 
+                          key={team.name} 
+                          className={`border-b ${rowBg} transition-colors ${
+                            isHighlighted ? 'bg-emerald-500/15 border-emerald-500/35 font-bold shadow-[0_0_12px_rgba(16,185,129,0.08)]' : 'hover:bg-white/5'
+                          }`}
+                        >
+                          <td className="py-2.5 px-1.5 text-center font-bold font-mono">
+                            <span className={`w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] sm:text-[10px] ${rankBg}`}>
+                              {idx + 1}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-1.5 font-semibold text-white flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="text-sm sm:text-base">{getCountryEmoji(team.name, handleFlagClick)}</span>
+                            <span className="truncate max-w-[120px]">{team.name}</span>
+                            {isHighlighted && <span className="text-[8px] text-emerald-400 font-extrabold bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/20">ĐANG XEM</span>}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center font-bold font-mono text-gray-300">{team.played}</td>
+                          <td className={`py-2.5 px-1.5 text-center font-bold font-mono ${team.gd > 0 ? 'text-emerald-400' : team.gd < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {team.gd > 0 ? `+${team.gd}` : team.gd}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center font-black font-mono text-emerald-400 text-xs sm:text-sm">{team.pts}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Group Matches History */}
+              <div className="border-t border-white/5 pt-4 mt-4">
+                <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-2.5">
+                  ⚽ Lịch thi đấu & Kết quả {groupNameForStandings}
+                </h4>
+                <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1 scrollbar-premium">
+                  {groupMatchesForStandings.map(m => {
+                    const homeWinner = m.scoreHome !== null && m.scoreAway !== null && m.scoreHome > m.scoreAway;
+                    const awayWinner = m.scoreHome !== null && m.scoreAway !== null && m.scoreAway > m.scoreHome;
+                    const isMatchFinished = m.scoreHome !== null && m.scoreAway !== null;
+                    
+                    return (
+                      <div key={m.id} className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5 text-xs gap-3">
+                        <span className="text-[9px] text-gray-500 font-mono">{m.date} {m.time}</span>
+                        <div className="flex items-center gap-1.5 flex-1 justify-center min-w-0">
+                          <span className={`font-semibold truncate text-right flex-1 ${homeWinner ? 'text-emerald-400 font-bold' : 'text-gray-300'}`}>{m.teamHome}</span>
+                          <span className="font-bold text-cyan-400 font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5 text-center shrink-0">
+                            {isMatchFinished ? `${m.scoreHome} - ${m.scoreAway}` : 'vs'}
+                          </span>
+                          <span className={`font-semibold truncate text-left flex-1 ${awayWinner ? 'text-emerald-400 font-bold' : 'text-gray-300'}`}>{m.teamAway}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );

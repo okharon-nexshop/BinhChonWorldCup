@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Lock, Unlock, Calendar, Check, Save, HelpCircle, History, Clock } from 'lucide-react';
+import { Lock, Unlock, Calendar, Check, Save, HelpCircle, History, Clock, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { getAiPrediction } from '../utils/aiPredictor';
 
 // Helper to resolve flag emojis for teams
-export function getCountryEmoji(teamName) {
+export function getCountryEmoji(teamName, onClick) {
   const codeMap = {
     'Mexico': 'mx',
     'Nam Phi': 'za',
@@ -65,11 +66,34 @@ export function getCountryEmoji(teamName) {
       src={`https://flagcdn.com/${code}.svg`} 
       alt={`${teamName} flag`} 
       className="flag-img"
+      style={onClick ? { cursor: 'pointer' } : undefined}
+      title={onClick ? `Xem bảng đấu của ${teamName}` : undefined}
+      onClick={onClick ? (e) => { e.stopPropagation(); onClick(teamName); } : undefined}
     />
   );
 }
 
-function MatchCard({ match, onSavePrediction, today, tomorrow }) {
+function renderAnalysis(text) {
+  if (!text) return null;
+  return text.split('\n').map((line, i) => {
+    if (line.trim().startsWith('- ')) {
+      const parts = line.replace('- ', '').split('**');
+      return (
+        <li key={i} className="text-xs text-gray-300 ml-4 list-disc mt-1">
+          {parts.map((part, idx) => idx % 2 === 1 ? <strong key={idx} className="text-white">{part}</strong> : part)}
+        </li>
+      );
+    }
+    const parts = line.split('**');
+    return (
+      <p key={i} className="text-xs text-gray-300 mt-1.5">
+        {parts.map((part, idx) => idx % 2 === 1 ? <strong key={idx} className="text-emerald-400">{part}</strong> : part)}
+      </p>
+    );
+  });
+}
+
+function MatchCard({ match, onSavePrediction, today, tomorrow, onFlagClick }) {
   const { id, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
   const isLive = (() => {
     if (!match.datetime) return false;
@@ -89,6 +113,7 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
 
   const hasVoted = prediction !== null;
   const isVoteOpen = (date === today || date === tomorrow) && !isLocked;
@@ -176,10 +201,12 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
     }
   }, [isExact]);
 
+  const aiPrediction = showAiModal ? getAiPrediction(teamHome, teamAway) : null;
+
   return (
     <div className={`match-card ${isLive ? 'live-match' : ''} ${isLocked && !isLive ? 'opacity-90' : ''}`}>
       
-      {/* 1. TOP ROW: TIME / DATE (Thời gian - Ngày to lên & Bảng đấu) */}
+      {/* 1. TOP ROW: TIME / DATE */}
       <div className="match-card-header-centered">
         {isLive ? (
           <div className="live-badge">
@@ -196,11 +223,10 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
         </span>
       </div>
 
-      {/* 2. MIDDLE ROW: 2 CỜ 2 ĐỘI VS NHAU CHUNG 1 DÒNG */}
+      {/* 2. MIDDLE ROW: 2 FLAGS AND SCORE */}
       <div className="match-card-middle">
-        {/* Row of Flags with VS/Score */}
         <div className="match-card-flags">
-          <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamHome)}</span>
+          <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamHome, onFlagClick)}</span>
           
           {scoreHome !== null && scoreAway !== null ? (
             <div className="flex flex-col items-center gap-1">
@@ -228,23 +254,20 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
             </span>
           )}
           
-          <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamAway)}</span>
+          <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamAway, onFlagClick)}</span>
         </div>
         
-        {/* Row of Team Names */}
         <div className="match-card-teams">
           {teamHome} — {teamAway}
         </div>
       </div>
 
-      {/* Divider */}
       <div className="match-card-divider"></div>
 
-      {/* 3. BOTTOM ROW: TỶ SỐ CHUNG 1 DÒNG LUÔN, CHO TYPE VÀO */}
+      {/* 3. BOTTOM ROW: PREDICTION FORM OR STATUS */}
       <div>
         {isLocked ? (
-          // Locked view: Centered
-          <div className="flex flex-col items-center justify-center gap-1.5 text-center text-xs">
+          <div className="flex flex-col items-center justify-center gap-1.5 text-center text-xs w-full">
             <div className="flex items-center justify-center gap-2">
               <span className="text-gray-500 flex items-center gap-1">
                 <Lock size={10} /> Bạn đoán:
@@ -262,9 +285,18 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
                 {resultText}
               </span>
             )}
+            {scoreHome !== null && scoreAway !== null && (
+              <a
+                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`Highlight ${teamHome} vs ${teamAway} World Cup 2026`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary text-[10px] px-2.5 py-1 flex items-center gap-1 mt-2.5 w-full justify-center text-red-400 border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5 font-semibold"
+              >
+                📺 Xem Highlight
+              </a>
+            )}
           </div>
         ) : hasVoted ? (
-          // Voted, not locked yet: read-only
           <div className="flex flex-col items-center justify-center gap-1.5 text-center text-xs">
             <div className="flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
               <span className="text-emerald-400 font-bold flex items-center gap-1">
@@ -279,47 +311,54 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
             </span>
           </div>
         ) : isVoteOpen ? (
-          // Open voting: Centered prediction form
-          <form onSubmit={handleSave} className="match-card-prediction-form">
-            <div className="match-card-prediction-inputs">
-              <span className="match-card-prediction-label">Dự đoán:</span>
-              <input
-                type="number"
-                min="0"
-                className="score-type-input"
-                placeholder="0"
-                value={predHome}
-                onChange={handleHomeChange}
-                required
-              />
-              <span className="text-gray-500 font-extrabold">:</span>
-              <input
-                type="number"
-                min="0"
-                className="score-type-input"
-                placeholder="0"
-                value={predAway}
-                onChange={handleAwayChange}
-                required
-              />
-              
-              <button
-                type="submit"
-                disabled={saving || !dirty}
-                className={`btn py-1.5 px-3.5 text-xs rounded-lg ${dirty ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                {saving ? (
-                  <span className="animate-spin rounded-full h-3 w-3 border-b border-current"></span>
-                ) : success ? (
-                  <Check size={12} className="text-black" />
-                ) : (
-                  <Save size={12} />
-                )}
-              </button>
-            </div>
-          </form>
+          <div className="w-full flex flex-col items-center">
+            <form onSubmit={handleSave} className="match-card-prediction-form w-full">
+              <div className="match-card-prediction-inputs">
+                <span className="match-card-prediction-label">Dự đoán:</span>
+                <input
+                  type="number"
+                  min="0"
+                  className="score-type-input"
+                  placeholder="0"
+                  value={predHome}
+                  onChange={handleHomeChange}
+                  required
+                />
+                <span className="text-gray-500 font-extrabold">:</span>
+                <input
+                  type="number"
+                  min="0"
+                  className="score-type-input"
+                  placeholder="0"
+                  value={predAway}
+                  onChange={handleAwayChange}
+                  required
+                />
+                
+                <button
+                  type="submit"
+                  disabled={saving || !dirty}
+                  className={`btn py-1.5 px-3.5 text-xs rounded-lg ${dirty ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  {saving ? (
+                    <span className="animate-spin rounded-full h-3 w-3 border-b border-current"></span>
+                  ) : success ? (
+                    <Check size={12} className="text-black" />
+                  ) : (
+                    <Save size={12} />
+                  )}
+                </button>
+              </div>
+            </form>
+            <button
+              type="button"
+              className="btn btn-secondary text-xs px-2.5 py-1.5 flex items-center gap-1 mt-2.5 w-full justify-center text-emerald-400 hover:text-emerald-300 border-emerald-500/10 hover:border-emerald-500/30 font-semibold"
+              onClick={() => setShowAiModal(true)}
+            >
+              🧠 AI Dự Đoán
+            </button>
+          </div>
         ) : (
-          // Future match: locked voting
           <div className="flex flex-col items-center justify-center text-xs text-gray-500 bg-white/5 p-2 rounded-lg border border-white/5 gap-1">
             <span className="flex items-center justify-center gap-1 font-medium text-gray-400">
               <Lock size={10} /> Chưa mở bình chọn
@@ -331,11 +370,124 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
         )}
       </div>
 
+      {/* AI PREDICTION MODAL */}
+      {showAiModal && aiPrediction && (
+        <div className="modal-backdrop z-[9999]" onClick={() => setShowAiModal(false)}>
+          <div 
+            className="glass-panel w-full max-w-md p-6 relative shadow-2xl border border-white/10 rounded-2xl bg-[#0c1410]/95 text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              type="button"
+              onClick={() => setShowAiModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-xl">🧠</span>
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">AI Dự Đoán Kết Quả</h3>
+                <p className="text-[10px] text-gray-400 font-mono mt-0.5">Poisson Model & Head-to-Head Stats</p>
+              </div>
+            </div>
+
+            <div className="bg-black/30 p-4 rounded-xl border border-white/5 mb-4 flex justify-between items-center text-center">
+              <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+                <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamHome, onFlagClick)}</span>
+                <span className="text-xs font-bold text-gray-200 truncate w-full">{teamHome}</span>
+              </div>
+              
+              <div className="flex flex-col items-center px-4 shrink-0">
+                <span className="text-[9px] text-gray-500 font-extrabold uppercase bg-white/5 px-2 py-0.5 rounded border border-white/5 mb-1">Dự Đoán Tỷ Số</span>
+                <span className="text-xl font-black text-emerald-400 glow-text font-mono">
+                  {aiPrediction.suggestedHomeScore} - {aiPrediction.suggestedAwayScore}
+                </span>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+                <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamAway, onFlagClick)}</span>
+                <span className="text-xs font-bold text-gray-200 truncate w-full">{teamAway}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 mb-4 bg-white/5 p-3.5 rounded-xl border border-white/5">
+              <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
+                📊 Tỉ lệ phần trăm kết quả
+              </h4>
+              
+              <div className="w-full h-3.5 rounded-full overflow-hidden flex bg-white/5">
+                <div 
+                  style={{ width: `${aiPrediction.homeProb}%` }} 
+                  className="bg-emerald-500 h-full flex items-center justify-center text-[8px] font-bold text-black font-mono transition-all duration-500"
+                  title={`${teamHome} thắng: ${aiPrediction.homeProb}%`}
+                >
+                  {aiPrediction.homeProb > 15 && `${aiPrediction.homeProb}%`}
+                </div>
+                <div 
+                  style={{ width: `${aiPrediction.drawProb}%` }} 
+                  className="bg-gray-500 h-full flex items-center justify-center text-[8px] font-bold text-white font-mono transition-all duration-500"
+                  title={`Hòa: ${aiPrediction.drawProb}%`}
+                >
+                  {aiPrediction.drawProb > 15 && `${aiPrediction.drawProb}%`}
+                </div>
+                <div 
+                  style={{ width: `${aiPrediction.awayProb}%` }} 
+                  className="bg-cyan-500 h-full flex items-center justify-center text-[8px] font-bold text-black font-mono transition-all duration-500"
+                  title={`${teamAway} thắng: ${aiPrediction.awayProb}%`}
+                >
+                  {aiPrediction.awayProb > 15 && `${aiPrediction.awayProb}%`}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-[9px] font-semibold flex-wrap gap-1">
+                <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> {teamHome} ({aiPrediction.homeProb}%)
+                </span>
+                <span className="text-gray-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500 inline-block" /> Hòa ({aiPrediction.drawProb}%)
+                </span>
+                <span className="text-cyan-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" /> {teamAway} ({aiPrediction.awayProb}%)
+                </span>
+              </div>
+            </div>
+
+            <div className="max-h-48 overflow-y-auto bg-black/20 p-3.5 rounded-xl border border-white/5 text-xs text-gray-300 mb-5 scrollbar-premium pr-1 leading-relaxed">
+              {renderAnalysis(aiPrediction.analysisText)}
+            </div>
+
+            <div className="flex gap-2.5">
+              <button
+                type="button"
+                className="btn btn-secondary w-1/3 py-2.5 text-xs"
+                onClick={() => setShowAiModal(false)}
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary w-2/3 py-2.5 text-xs font-bold flex items-center justify-center gap-1"
+                onClick={() => {
+                  setPredHome(String(aiPrediction.suggestedHomeScore));
+                  setPredAway(String(aiPrediction.suggestedAwayScore));
+                  setDirty(true);
+                  setSuccess(false);
+                  setShowAiModal(false);
+                }}
+              >
+                📝 Áp dụng kết quả ({aiPrediction.suggestedHomeScore} - {aiPrediction.suggestedAwayScore})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default function MatchList({ matches, onSavePrediction }) {
+export default function MatchList({ matches, onSavePrediction, onFlagClick }) {
   // Compute today's date formatted as DD/MM in GMT+7
   const today = (() => {
     const now = new Date();
@@ -529,6 +681,7 @@ export default function MatchList({ matches, onSavePrediction }) {
                     onSavePrediction={onSavePrediction}
                     today={today}
                     tomorrow={tomorrow}
+                    onFlagClick={onFlagClick}
                   />
                 ))}
               </div>
@@ -557,6 +710,7 @@ export default function MatchList({ matches, onSavePrediction }) {
                     onSavePrediction={onSavePrediction}
                     today={today}
                     tomorrow={tomorrow}
+                    onFlagClick={onFlagClick}
                   />
                 ))}
               </div>
@@ -592,6 +746,7 @@ export default function MatchList({ matches, onSavePrediction }) {
                     onSavePrediction={onSavePrediction}
                     today={today}
                     tomorrow={tomorrow}
+                    onFlagClick={onFlagClick}
                   />
                 ))}
               </div>
@@ -639,6 +794,7 @@ export default function MatchList({ matches, onSavePrediction }) {
                         onSavePrediction={onSavePrediction}
                         today={today}
                         tomorrow={tomorrow}
+                        onFlagClick={onFlagClick}
                       />
                     ))}
                   </div>

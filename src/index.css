@@ -1086,6 +1086,56 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 420px;
 }
 
+/* Z-Index Utility Classes */
+.z-\[999\] {
+  z-index: 999 !important;
+}
+.z-\[9999\] {
+  z-index: 9999 !important;
+}
+
+/* Scrollbar styling for popups */
+.scrollbar-premium::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Group Standings Highlights */
+.bg-emerald-500\/15 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.border-emerald-500\/35 {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.border-emerald-500\/40 {
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+/* AI predictor segment classes */
+.bg-emerald-500 {
+  background-color: #10b981 !important;
+}
+
+.bg-gray-500 {
+  background-color: #6b7280 !important;
+}
+
+.bg-cyan-500 {
+  background-color: #06b6d4 !important;
+}
+
+/* Custom interactive flag style */
+.flag-img[style*="cursor: pointer"]:hover {
+  filter: brightness(1.1) drop-shadow(0 0 4px rgba(0, 255, 136, 0.4));
+  transform: scale(1.08);
+}
+
+.flag-img {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
 
 
 
