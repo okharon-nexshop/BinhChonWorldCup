@@ -72,7 +72,7 @@ export function getCountryEmoji(teamName) {
 function MatchCard({ match, onSavePrediction, today, tomorrow }) {
   const { id, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
   const isLive = (() => {
-    if (!match.datetime) return false;
+    if (!match.datetime || match.scoreHome !== null || match.scoreAway !== null) return false;
     const kickoff = new Date(match.datetime).getTime();
     const now = Date.now();
     return now >= kickoff && now <= kickoff + 2.5 * 60 * 60 * 1000;
@@ -355,7 +355,7 @@ export default function MatchList({ matches, onSavePrediction }) {
 
   // 1. Live Matches: kickoff <= now <= kickoff + 2.5 hours
   const liveMatches = matches.filter(m => {
-    if (!m.datetime) return false;
+    if (!m.datetime || m.scoreHome !== null || m.scoreAway !== null) return false;
     const kickoff = new Date(m.datetime);
     return now >= kickoff && now <= new Date(kickoff.getTime() + 2.5 * 60 * 60 * 1000);
   });
