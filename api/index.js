@@ -275,10 +275,32 @@ app.get('/api/matches', authenticate, async (req, res) => {
     
     const matchesWithPredictions = db.matches.map(m => {
       const pred = db.predictions.find(p => p.userId === userId && p.matchId === m.id);
+      
+      // Calculate crowd statistics
+      const allPreds = db.predictions.filter(p => p.matchId === m.id);
+      const total = allPreds.length;
+      let homeWins = 0;
+      let awayWins = 0;
+      let draws = 0;
+      
+      allPreds.forEach(p => {
+        if (p.predictHome > p.predictAway) homeWins++;
+        else if (p.predictHome < p.predictAway) awayWins++;
+        else draws++;
+      });
+      
+      const crowdStats = {
+        homeWinPct: total > 0 ? Math.round((homeWins / total) * 100) : 0,
+        drawPct: total > 0 ? Math.round((draws / total) * 100) : 0,
+        awayWinPct: total > 0 ? Math.round((awayWins / total) * 100) : 0,
+        total: total
+      };
+
       return {
         ...m,
         isLocked: isMatchLocked(m.datetime),
-        prediction: pred ? { predictHome: pred.predictHome, predictAway: pred.predictAway } : null
+        prediction: pred ? { predictHome: pred.predictHome, predictAway: pred.predictAway } : null,
+        crowdStats
       };
     });
 
@@ -350,6 +372,7 @@ app.get('/api/leaderboard', authenticate, async (req, res) => {
   try {
     const db = await readDB();
     const finishedMatches = db.matches.filter(m => m.scoreHome !== null && m.scoreAway !== null);
+    const sortedFinishedMatches = [...finishedMatches].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     
     const userStats = db.users.map(u => {
       let balance = 0;
@@ -382,6 +405,84 @@ app.get('/api/leaderboard', authenticate, async (req, res) => {
         }
       });
 
+      // Check for reverse guess: match where 70%+ of community guessed wrong, but this user guessed correct outcome
+      let hasReverseGuess = false;
+      finishedMatches.forEach(m => {
+        const allPredsForMatch = db.predictions.filter(p => p.matchId === m.id);
+        if (allPredsForMatch.length >= 3) {
+          const actualOutcome = m.scoreHome > m.scoreAway ? 'home' : (m.scoreHome === m.scoreAway ? 'draw' : 'away');
+          const wrongPredsCount = allPredsForMatch.filter(p => {
+            const pOutcome = p.predictHome > p.predictAway ? 'home' : (p.predictHome === p.predictAway ? 'draw' : 'away');
+            return pOutcome !== actualOutcome;
+          }).length;
+          
+          if (wrongPredsCount / allPredsForMatch.length >= 0.7) {
+            const myPred = allPredsForMatch.find(p => p.userId === u.id);
+            if (myPred) {
+              const myOutcome = myPred.predictHome > myPred.predictAway ? 'home' : (myPred.predictHome === myPred.predictAway ? 'draw' : 'away');
+              if (myOutcome === actualOutcome) {
+                hasReverseGuess = true;
+              }
+            }
+          }
+        }
+      });
+
+      // Streaks calculation
+      let currentStreak = 0;
+      let maxStreak = 0;
+      let currentWrongStreak = 0;
+      let maxWrongStreak = 0;
+      let currentExactStreak = 0;
+      let maxExactScoresInARow = 0;
+
+      sortedFinishedMatches.forEach(m => {
+        const pred = db.predictions.find(p => p.userId === u.id && p.matchId === m.id);
+        const actualOutcome = m.scoreHome > m.scoreAway ? 'home' : (m.scoreHome === m.scoreAway ? 'draw' : 'away');
+
+        if (pred) {
+          const predictedOutcome = pred.predictHome > pred.predictAway ? 'home' : (pred.predictHome === pred.predictAway ? 'draw' : 'away');
+          const isExact = pred.predictHome === m.scoreHome && pred.predictAway === m.scoreAway;
+
+          if (isExact) {
+            currentExactStreak++;
+            maxExactScoresInARow = Math.max(maxExactScoresInARow, currentExactStreak);
+          } else {
+            currentExactStreak = 0;
+          }
+
+          if (predictedOutcome === actualOutcome) {
+            currentStreak++;
+            maxStreak = Math.max(maxStreak, currentStreak);
+            currentWrongStreak = 0;
+          } else {
+            currentStreak = 0;
+            currentWrongStreak++;
+            maxWrongStreak = Math.max(maxWrongStreak, currentWrongStreak);
+          }
+        } else {
+          currentStreak = 0;
+          currentExactStreak = 0;
+          currentWrongStreak++;
+          maxWrongStreak = Math.max(maxWrongStreak, currentWrongStreak);
+        }
+      });
+
+      // Construct badges dynamically
+      const badges = [];
+      if (maxExactScoresInARow >= 2 || maxStreak >= 4) {
+        badges.push({ type: 'champion', icon: '👑', label: 'Vua Tiên Tri', desc: 'Đoán trúng 2 tỉ số liên tiếp hoặc 4 kết quả liên tiếp' });
+      }
+      if (hasReverseGuess) {
+        badges.push({ type: 'rebel', icon: '⚡', label: 'Kẻ Ngược Dòng', desc: 'Đoán đúng trận đấu mà trên 70% mọi người đoán sai' });
+      }
+      if (correctOutcomes >= 4 && correctScores === 0) {
+        badges.push({ type: 'runner-up', icon: '🥈', label: 'Thần Suýt Trúng', desc: 'Đoán đúng kết quả 4 trận nhưng chưa trúng tỉ số chính xác lần nào' });
+      }
+      if (maxWrongStreak >= 4) {
+        badges.push({ type: 'unlucky', icon: '📉', label: 'Bại Trận', desc: 'Đoán sai hoặc bỏ lỡ liên tiếp 4 trận đấu' });
+      }
+
       return {
         userId: u.id,
         username: u.username,
@@ -392,6 +493,7 @@ app.get('/api/leaderboard', authenticate, async (req, res) => {
         correctOutcomes,
         wrongOutcomes,
         missed,
+        badges,
         totalFinished: finishedMatches.length
       };
     });
@@ -460,6 +562,7 @@ app.get('/api/leaderboard/user/:userId', authenticate, async (req, res) => {
         group: m.group,
         date: m.date,
         time: m.time,
+        datetime: m.datetime,
         teamHome: m.teamHome,
         teamAway: m.teamAway,
         scoreHome: m.scoreHome,

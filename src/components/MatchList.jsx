@@ -93,6 +93,21 @@ function renderAnalysis(text) {
   });
 }
 
+export function formatCountdown(ms) {
+  if (ms <= 0) return 'Đã khóa';
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+  if (days >= 1) {
+    return `Còn ${days} ngày`;
+  }
+  
+  const pad = (n) => String(n).padStart(2, '0');
+  return `Khóa sau: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
 function MatchCard({ match, onSavePrediction, today, tomorrow, onFlagClick }) {
   const { id, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
   const isLive = (() => {
@@ -114,9 +129,25 @@ function MatchCard({ match, onSavePrediction, today, tomorrow, onFlagClick }) {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   const hasVoted = prediction !== null;
   const isVoteOpen = (date === today || date === tomorrow) && !isLocked;
+
+  React.useEffect(() => {
+    if (isLocked || isLive || !match.datetime) return;
+    
+    const lockTime = new Date(match.datetime).getTime() - 5 * 60 * 1000;
+    const calculateTimeLeft = () => {
+      const diff = lockTime - Date.now();
+      setTimeLeft(diff > 0 ? diff : 0);
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [match.datetime, isLocked, isLive]);
 
   const handleHomeChange = (e) => {
     if (!isVoteOpen) return;
@@ -221,6 +252,11 @@ function MatchCard({ match, onSavePrediction, today, tomorrow, onFlagClick }) {
         <span className="badge badge-scheduled text-[9px] py-0.5 px-2 bg-white/5 border border-white/5 text-gray-400 font-semibold mt-1">
           {group}
         </span>
+        {!isLocked && !isLive && match.datetime && (
+          <div className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full mt-1.5 font-mono animate-pulse">
+            ⏱️ {formatCountdown(timeLeft)}
+          </div>
+        )}
       </div>
 
       {/* 2. MIDDLE ROW: 2 FLAGS AND SCORE */}
@@ -266,6 +302,57 @@ function MatchCard({ match, onSavePrediction, today, tomorrow, onFlagClick }) {
 
       {/* 3. BOTTOM ROW: PREDICTION FORM OR STATUS */}
       <div>
+        {!isLocked && match.crowdStats && (
+          <div className="crowd-wisdom-container w-full mb-3.5 p-2.5 rounded-xl bg-white/5 border border-white/5">
+            <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+              <span>📊 Dự đoán đám đông ({match.crowdStats.total} lượt)</span>
+            </div>
+            {match.crowdStats.total > 0 ? (
+              <>
+                <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/10">
+                  <div 
+                    style={{ width: `${match.crowdStats.homeWinPct}%` }} 
+                    className="bg-emerald-500 h-full flex items-center justify-center text-[8px] font-black text-black font-mono transition-all duration-500"
+                    title={`${teamHome} thắng: ${match.crowdStats.homeWinPct}%`}
+                  >
+                    {match.crowdStats.homeWinPct > 15 && `${match.crowdStats.homeWinPct}%`}
+                  </div>
+                  <div 
+                    style={{ width: `${match.crowdStats.drawPct}%` }} 
+                    className="bg-gray-500 h-full flex items-center justify-center text-[8px] font-black text-white font-mono transition-all duration-500"
+                    title={`Hòa: ${match.crowdStats.drawPct}%`}
+                  >
+                    {match.crowdStats.drawPct > 15 && `${match.crowdStats.drawPct}%`}
+                  </div>
+                  <div 
+                    style={{ width: `${match.crowdStats.awayWinPct}%` }} 
+                    className="bg-cyan-500 h-full flex items-center justify-center text-[8px] font-black text-black font-mono transition-all duration-500"
+                    title={`${teamAway} thắng: ${match.crowdStats.awayWinPct}%`}
+                  >
+                    {match.crowdStats.awayWinPct > 15 && `${match.crowdStats.awayWinPct}%`}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[9px] font-bold mt-1 text-gray-400">
+                  <span className="text-emerald-400 truncate max-w-[30%]">{teamHome} ({match.crowdStats.homeWinPct}%)</span>
+                  <span className="text-gray-400">Hòa ({match.crowdStats.drawPct}%)</span>
+                  <span className="text-cyan-400 truncate max-w-[30%]">{teamAway} ({match.crowdStats.awayWinPct}%)</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/10">
+                  <div style={{ width: '33.33%' }} className="bg-white/10 h-full"></div>
+                  <div style={{ width: '33.34%' }} className="bg-white/10 h-full border-x border-white/5"></div>
+                  <div style={{ width: '33.33%' }} className="bg-white/10 h-full"></div>
+                </div>
+                <div className="flex justify-center items-center text-[9px] font-medium mt-1 text-gray-500 italic">
+                  Chưa có lượt dự đoán nào
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {isLocked ? (
           <div className="flex flex-col items-center justify-center gap-1.5 text-center text-xs w-full">
             <div className="flex items-center justify-center gap-2">
@@ -612,7 +699,7 @@ export default function MatchList({ matches, onSavePrediction, onFlagClick }) {
             <span>VTVGo</span> 🔴
           </a>
           <a
-            href="https://tieulamlive.com"
+            href="https://sv2.tieulamlive.net/trang-chu"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary bg-purple-600 border-purple-500 text-white hover:bg-purple-500 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_15px_rgba(147,51,234,0.15)] flex-grow md:flex-grow-0 justify-center"

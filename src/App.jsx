@@ -320,7 +320,7 @@ export default function App() {
                 VTV
               </a>
               <a
-                href="https://tieulamlive.com"
+                href="https://sv2.tieulamlive.net/trang-chu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 py-1 px-1.5 sm:px-2.5 rounded-lg bg-purple-600/10 border border-purple-500/20 text-purple-400 text-[9px] sm:text-[11px] font-bold hover:bg-purple-600/20 hover:border-purple-500/40 transition-all animate-pulse"

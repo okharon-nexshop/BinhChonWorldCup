@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, Unlock, Calendar, Trophy, X, Save, Check, ShieldAlert } from 'lucide-react';
-import { getCountryEmoji } from './MatchList';
+import { getCountryEmoji, formatCountdown } from './MatchList';
 import { getAiPrediction } from '../utils/aiPredictor';
 
 // Helper to format placeholder team names into friendly Vietnamese
@@ -209,6 +209,22 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showAiModal, setShowAiModal] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  React.useEffect(() => {
+    if (!selectedMatch || selectedMatch.isLocked || !selectedMatch.datetime) return;
+
+    const lockTime = new Date(selectedMatch.datetime).getTime() - 5 * 60 * 1000;
+    const calculateTimeLeft = () => {
+      const diff = lockTime - Date.now();
+      setTimeLeft(diff > 0 ? diff : 0);
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [selectedMatch]);
 
   // Compute today & tomorrow in GMT+7 for open voting checks
   const today = (() => {
@@ -708,6 +724,11 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
               <h3 className="text-sm font-bold text-gray-500 mt-2 flex items-center gap-1 font-mono">
                 <Calendar size={10} /> Vòng: {selectedMatch.group} • {selectedMatch.date} {selectedMatch.time}
               </h3>
+              {!selectedMatch.isLocked && selectedMatch.datetime && (
+                <div className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full mt-1.5 font-mono animate-pulse inline-block">
+                  ⏱️ {formatCountdown(timeLeft)}
+                </div>
+              )}
             </div>
 
             {/* Error Message */}
@@ -838,6 +859,57 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
                       </button>
                     </div>
                     
+                    {selectedMatch.crowdStats && (
+                      <div className="crowd-wisdom-container w-full mb-3.5 p-2.5 rounded-xl bg-white/5 border border-white/5 text-left">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wide">
+                          <span>📊 Dự đoán đám đông ({selectedMatch.crowdStats.total} lượt)</span>
+                        </div>
+                        {selectedMatch.crowdStats.total > 0 ? (
+                          <>
+                            <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/10">
+                              <div 
+                                style={{ width: `${selectedMatch.crowdStats.homeWinPct}%` }} 
+                                className="bg-emerald-500 h-full flex items-center justify-center text-[8px] font-black text-black font-mono transition-all duration-500"
+                                title={`${selectedMatch.teamHome} thắng: ${selectedMatch.crowdStats.homeWinPct}%`}
+                              >
+                                {selectedMatch.crowdStats.homeWinPct > 15 && `${selectedMatch.crowdStats.homeWinPct}%`}
+                              </div>
+                              <div 
+                                style={{ width: `${selectedMatch.crowdStats.drawPct}%` }} 
+                                className="bg-gray-500 h-full flex items-center justify-center text-[8px] font-black text-white font-mono transition-all duration-500"
+                                title={`Hòa: ${selectedMatch.crowdStats.drawPct}%`}
+                              >
+                                {selectedMatch.crowdStats.drawPct > 15 && `${selectedMatch.crowdStats.drawPct}%`}
+                              </div>
+                              <div 
+                                style={{ width: `${selectedMatch.crowdStats.awayWinPct}%` }} 
+                                className="bg-cyan-500 h-full flex items-center justify-center text-[8px] font-black text-black font-mono transition-all duration-500"
+                                title={`${selectedMatch.teamAway} thắng: ${selectedMatch.crowdStats.awayWinPct}%`}
+                              >
+                                {selectedMatch.crowdStats.awayWinPct > 15 && `${selectedMatch.crowdStats.awayWinPct}%`}
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center text-[9px] font-bold mt-1 text-gray-400">
+                              <span className="text-emerald-400 truncate max-w-[30%]">{selectedMatch.teamHome} ({selectedMatch.crowdStats.homeWinPct}%)</span>
+                              <span className="text-gray-400">Hòa ({selectedMatch.crowdStats.drawPct}%)</span>
+                              <span className="text-cyan-400 truncate max-w-[30%]">{selectedMatch.teamAway} ({selectedMatch.crowdStats.awayWinPct}%)</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/10">
+                              <div style={{ width: '33.33%' }} className="bg-white/10 h-full"></div>
+                              <div style={{ width: '33.34%' }} className="bg-white/10 h-full border-x border-white/5"></div>
+                              <div style={{ width: '33.33%' }} className="bg-white/10 h-full"></div>
+                            </div>
+                            <div className="flex justify-center items-center text-[9px] font-medium mt-1 text-gray-500 italic">
+                              Chưa có lượt dự đoán nào
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
                     {!isPlaceholder(selectedMatch.teamHome) && !isPlaceholder(selectedMatch.teamAway) && (
                       <button
                         type="button"

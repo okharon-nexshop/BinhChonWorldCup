@@ -11,6 +11,7 @@ export default function Leaderboard({ currentUser, onFlagClick }) {
   const [userDetail, setUserDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredPoint, setHoveredPoint] = useState(null);
 
   // Fetch leaderboard data
   const fetchLeaderboard = async () => {
@@ -56,6 +57,7 @@ export default function Leaderboard({ currentUser, onFlagClick }) {
   const handleCloseModal = () => {
     setSelectedUser(null);
     setUserDetail(null);
+    setHoveredPoint(null);
   };
 
 
@@ -158,8 +160,17 @@ export default function Leaderboard({ currentUser, onFlagClick }) {
                         {/* Name */}
                         <td className="py-3 px-2 sm:py-4 sm:px-6">
                           <div className="flex flex-col">
-                            <span className={`text-gray-100 text-xs sm:text-sm ${isSelf ? 'text-emerald-400 font-semibold' : ''}`}>
+                            <span className={`text-gray-100 text-xs sm:text-sm ${isSelf ? 'text-emerald-400 font-semibold' : ''} flex items-center gap-1.5 flex-wrap`}>
                               {user.displayName} {isSelf && <span className="text-[10px] text-gray-500 font-normal sm:inline hidden">(Bạn)</span>}
+                              {user.badges && user.badges.map((badge, bIdx) => (
+                                <span 
+                                  key={bIdx} 
+                                  className={`badge-item cursor-help text-[9px] px-1 py-0.2 rounded border bg-black/40 ${badge.type === 'champion' ? 'text-amber-400 border-amber-500/20' : badge.type === 'rebel' ? 'text-purple-400 border-purple-500/20' : badge.type === 'runner-up' ? 'text-gray-400 border-gray-400/20' : 'text-red-400 border-red-500/20'}`} 
+                                  title={badge.desc}
+                                >
+                                  {badge.icon} {badge.label}
+                                </span>
+                              ))}
                             </span>
                             <span className="text-[10px] sm:text-xs text-gray-500">@{user.username}</span>
                           </div>
@@ -253,6 +264,236 @@ export default function Leaderboard({ currentUser, onFlagClick }) {
                       </span>
                     </div>
                   </div>
+
+                  {/* Active badges list */}
+                  {selectedUser.badges && selectedUser.badges.length > 0 && (
+                    <div className="bg-white/5 p-3.5 rounded-xl border border-white/5 space-y-2">
+                      <h4 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                        🏆 Danh hiệu đạt được
+                      </h4>
+                      <div className="flex flex-col gap-2">
+                        {selectedUser.badges.map((badge, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5 bg-black/30 p-2 rounded-lg border border-white/5">
+                            <span className="text-lg shrink-0">{badge.icon}</span>
+                            <div className="min-w-0">
+                              <span className={`text-[11px] font-bold block ${badge.type === 'champion' ? 'text-amber-400' : badge.type === 'rebel' ? 'text-purple-400' : badge.type === 'runner-up' ? 'text-gray-400' : 'text-red-400'}`}>
+                                {badge.label}
+                              </span>
+                              <span className="text-[9px] text-gray-500 block mt-0.5 leading-tight">{badge.desc}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Native SVG Point Progression Line Chart */}
+                  {(() => {
+                    const finished = userDetail.matches
+                      .filter(m => m.scoreHome !== null && m.scoreAway !== null)
+                      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+                    
+                    if (finished.length === 0) {
+                      return (
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-center text-xs text-gray-500 italic">
+                          📈 Chưa có trận đấu nào kết thúc để vẽ biểu đồ phong độ
+                        </div>
+                      );
+                    }
+
+                    let currentBalance = 0;
+                    const dataPoints = finished.map((m, idx) => {
+                      let delta = 0;
+                      if (m.result === 'exact') delta = 100;
+                      else if (m.result === 'outcome') delta = 0;
+                      else if (m.result === 'wrong' || m.result === 'missed') delta = -100;
+                      currentBalance += delta;
+                      return {
+                        matchIndex: idx + 1,
+                        matchName: `${m.teamHome} vs ${m.teamAway}`,
+                        result: m.result,
+                        delta,
+                        balance: currentBalance,
+                        scoreText: `${m.scoreHome}-${m.scoreAway}`,
+                        predText: m.prediction ? `${m.prediction.predictHome}-${m.prediction.predictAway}` : 'bỏ lỡ'
+                      };
+                    });
+
+                    const chartPoints = [{ matchIndex: 0, matchName: 'Bắt đầu', balance: 0 }, ...dataPoints];
+                    const width = 500;
+                    const height = 160;
+                    const paddingX = 40;
+                    const paddingY = 20;
+
+                    const balances = chartPoints.map(p => p.balance);
+                    const minBalance = Math.min(...balances, 0);
+                    const maxBalance = Math.max(...balances, 0);
+                    const rangeY = maxBalance - minBalance;
+                    const safeRangeY = rangeY === 0 ? 200 : rangeY * 1.25;
+                    const midY = minBalance + rangeY / 2;
+                    const minYAxis = midY - safeRangeY / 2;
+                    const maxYAxis = midY + safeRangeY / 2;
+
+                    const getX = (index) => {
+                      if (chartPoints.length <= 1) return paddingX;
+                      return paddingX + (index / (chartPoints.length - 1)) * (width - 2 * paddingX);
+                    };
+
+                    const getY = (val) => {
+                      const range = maxYAxis - minYAxis;
+                      if (range === 0) return height / 2;
+                      return height - paddingY - ((val - minYAxis) / range) * (height - 2 * paddingY);
+                    };
+
+                    const firstX = getX(0);
+                    const firstY = getY(0);
+                    let linePath = `M ${firstX} ${firstY}`;
+                    for (let i = 1; i < chartPoints.length; i++) {
+                      linePath += ` L ${getX(i)} ${getY(chartPoints[i].balance)}`;
+                    }
+
+                    const lastX = getX(chartPoints.length - 1);
+                    const bottomY = height - paddingY;
+                    const areaPath = `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
+                    const zeroY = getY(0);
+
+                    const yLabels = Array.from(new Set([minBalance, 0, maxBalance])).sort((a, b) => a - b);
+
+                    return (
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-2">
+                        <h4 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                          📈 Biểu đồ phong độ (Điểm tích lũy)
+                        </h4>
+                        
+                        <div className="relative w-full overflow-hidden">
+                          <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="auto" className="overflow-visible">
+                            <defs>
+                              <linearGradient id="chartAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+                                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                              </linearGradient>
+                            </defs>
+
+                            {/* Horizontal grid lines and labels */}
+                            {yLabels.map((val, idx) => {
+                              const y = getY(val);
+                              return (
+                                <g key={idx}>
+                                  <line 
+                                    x1={paddingX} 
+                                    y1={y} 
+                                    x2={width - paddingX} 
+                                    y2={y} 
+                                    stroke="rgba(255, 255, 255, 0.05)" 
+                                    strokeWidth="1"
+                                  />
+                                  <text 
+                                    x={paddingX - 8} 
+                                    y={y + 3} 
+                                    fill="#6b7280" 
+                                    fontSize="8" 
+                                    fontFamily="monospace"
+                                    textAnchor="end"
+                                  >
+                                    {val >= 0 ? '+' : ''}{val}
+                                  </text>
+                                </g>
+                              );
+                            })}
+
+                            {/* Intersecting zero point dotted line */}
+                            <line 
+                              x1={paddingX} 
+                              y1={zeroY} 
+                              x2={width - paddingX} 
+                              y2={zeroY} 
+                              stroke="rgba(255, 255, 255, 0.12)" 
+                              strokeDasharray="3 3" 
+                              strokeWidth="1"
+                            />
+
+                            {/* Area Gradient Fill */}
+                            <path d={areaPath} fill="url(#chartAreaGradient)" />
+
+                            {/* Line path */}
+                            <path 
+                              d={linePath} 
+                              fill="none" 
+                              stroke="#10b981" 
+                              strokeWidth="2.5" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              style={{ filter: 'drop-shadow(0 0 4px rgba(16, 185, 129, 0.4))' }}
+                            />
+
+                            {/* Interactive hover circle dots */}
+                            {chartPoints.map((p, idx) => {
+                              if (idx === 0) return null;
+                              const x = getX(idx);
+                              const y = getY(p.balance);
+                              const isHovered = hoveredPoint && hoveredPoint.matchIndex === p.matchIndex;
+
+                              return (
+                                <g key={idx}>
+                                  <circle
+                                    cx={x}
+                                    cy={y}
+                                    r="8"
+                                    fill="transparent"
+                                    className="cursor-pointer"
+                                    onMouseEnter={() => setHoveredPoint(p)}
+                                    onMouseLeave={() => setHoveredPoint(null)}
+                                  />
+                                  <circle
+                                    cx={x}
+                                    cy={y}
+                                    r={isHovered ? "4.5" : "3"}
+                                    fill={p.delta > 0 ? "#10b981" : p.delta < 0 ? "#f43f5e" : "#6b7280"}
+                                    stroke="#0b0f19"
+                                    strokeWidth="1.5"
+                                    className="pointer-events-none transition-all duration-150"
+                                  />
+                                </g>
+                              );
+                            })}
+
+                            {/* SVG Tooltip */}
+                            {hoveredPoint && (
+                              <g pointerEvents="none">
+                                <rect
+                                  x={Math.max(10, Math.min(width - 170, getX(hoveredPoint.matchIndex) - 80))}
+                                  y={Math.max(5, getY(hoveredPoint.balance) - 45)}
+                                  width="160"
+                                  height="36"
+                                  rx="5"
+                                  fill="rgba(15, 23, 42, 0.95)"
+                                  stroke="rgba(16, 185, 129, 0.4)"
+                                  strokeWidth="1"
+                                />
+                                <text
+                                  x={Math.max(10, Math.min(width - 170, getX(hoveredPoint.matchIndex) - 80)) + 6}
+                                  y={Math.max(5, getY(hoveredPoint.balance) - 45) + 14}
+                                  fill="#f3f4f6"
+                                  fontSize="8"
+                                  fontWeight="bold"
+                                >
+                                  #{hoveredPoint.matchIndex}: {hoveredPoint.matchName}
+                                </text>
+                                <text
+                                  x={Math.max(10, Math.min(width - 170, getX(hoveredPoint.matchIndex) - 80)) + 6}
+                                  y={Math.max(5, getY(hoveredPoint.balance) - 45) + 26}
+                                  fill="#9ca3af"
+                                  fontSize="8"
+                                >
+                                  Đoán: {hoveredPoint.predText} | KQ: {hoveredPoint.scoreText} ({hoveredPoint.delta >= 0 ? '+' : ''}{hoveredPoint.delta})
+                                </text>
+                              </g>
+                            )}
+                          </svg>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <p className="text-[11px] text-gray-500 italic mt-1 text-center">
                     🔒 Dự đoán ở các trận sắp tới sẽ bị ẩn để đảm bảo tính công bằng cho đến khi bóng lăn.

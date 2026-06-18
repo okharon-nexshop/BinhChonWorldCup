@@ -1136,7 +1136,41 @@ h1, h2, h3, h4, h5, h6 {
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
+/* Badge and achievements style rules */
+.badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 1px 4px;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.badge-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.2);
+}
 
+/* Segmented Crowd Wisdom styling */
+.crowd-wisdom-container {
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.02);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.crowd-wisdom-container:hover {
+  border-color: rgba(16, 185, 129, 0.15);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.04);
+}
 
-
-
+/* Native SVG Line Chart Styling */
+svg circle {
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+svg circle:hover {
+  cursor: pointer;
+}
