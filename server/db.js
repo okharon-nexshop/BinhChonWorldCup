@@ -274,17 +274,18 @@ export async function readDB() {
       const { _id, ...rest } = doc;
       let { db: migratedDB, needsMigration } = migrateDatabase(rest);
       
-      let updatedScores = false;
-      try {
-        const autoResult = await autoUpdateScores(migratedDB);
-        migratedDB = autoResult.db;
-        updatedScores = autoResult.updated;
-      } catch (err) {
-        console.error('Auto update score error in MongoDB:', err);
-      }
+      // Trigger score update in the background so it doesn't block the request response
+      autoUpdateScores(migratedDB).then(async (autoResult) => {
+        if (autoResult.updated) {
+          console.log('Asynchronous score update completed, writing updated db state to MongoDB...');
+          await writeDB(autoResult.db);
+        }
+      }).catch(err => {
+        console.error('Asynchronous auto update score error in MongoDB:', err);
+      });
 
-      if (needsMigration || updatedScores) {
-        console.log('Writing updated db state to MongoDB...');
+      if (needsMigration) {
+        console.log('Writing migrated db state to MongoDB...');
         await writeDB(migratedDB);
       }
       return migratedDB;
@@ -309,17 +310,18 @@ export async function readDB() {
     const parsed = JSON.parse(data);
     let { db: migratedDB, needsMigration } = migrateDatabase(parsed);
     
-    let updatedScores = false;
-    try {
-      const autoResult = await autoUpdateScores(migratedDB);
-      migratedDB = autoResult.db;
-      updatedScores = autoResult.updated;
-    } catch (err) {
-      console.error('Auto update score error in local JSON:', err);
-    }
+    // Trigger score update in the background so it doesn't block the request response
+    autoUpdateScores(migratedDB).then(async (autoResult) => {
+      if (autoResult.updated) {
+        console.log('Asynchronous score update completed, writing updated db state to local JSON...');
+        await writeDB(autoResult.db);
+      }
+    }).catch(err => {
+      console.error('Asynchronous auto update score error in local JSON:', err);
+    });
 
-    if (needsMigration || updatedScores) {
-      console.log('Writing updated db state to local JSON...');
+    if (needsMigration) {
+      console.log('Writing migrated db state to local JSON...');
       await writeDB(migratedDB);
     }
     return migratedDB;
