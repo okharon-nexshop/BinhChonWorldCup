@@ -4,58 +4,69 @@ import confetti from 'canvas-confetti';
 
 // Helper to resolve flag emojis for teams
 export function getCountryEmoji(teamName) {
-  const flags = {
-    'Mexico': '🇲🇽',
-    'Nam Phi': '🇿🇦',
-    'Hàn Quốc': '🇰🇷',
-    'Canada': '🇨🇦',
-    'Qatar': '🇶🇦',
-    'Thụy Sĩ': '🇨🇭',
-    'Brazil': '🇧🇷',
-    'Morocco': '🇲🇦',
-    'Haiti': '🇭🇹',
-    'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-    'Mỹ': '🇺🇸',
-    'Paraguay': '🇵🇾',
-    'Úc': '🇦🇺',
-    'Đức': '🇩🇪',
-    'Ecuador': '🇪🇨',
-    'Bờ Biển Ngà': '🇨🇮',
-    'Curaçao': '🇨🇼',
-    'Hà Lan': '🇳🇱',
-    'Nhật Bản': '🇯🇵',
-    'Tunisia': '🇹🇳',
-    'Bỉ': '🇧🇪',
-    'Ai Cập': '🇪🇬',
-    'Iran': '🇮🇷',
-    'New Zealand': '🇳🇿',
-    'Tây Ban Nha': '🇪🇸',
-    'Cape Verde': '🇨🇻',
-    'Ả Rập Xê Út': '🇸🇦',
-    'Uruguay': '🇺🇾',
-    'Pháp': '🇫🇷',
-    'Senegal': '🇸🇳',
-    'Na Uy': '🇳🇴',
-    'Argentina': '🇦🇷',
-    'Algeria': '🇩🇿',
-    'Áo': '🇦🇹',
-    'Jordan': '🇯🇴',
-    'Bồ Đào Nha': '🇵🇹',
-    'Uzbekistan': '🇺🇿',
-    'Colombia': '🇨🇴',
-    'Anh': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-    'Croatia': '🇭🇷',
-    'Ghana': '🇬🇭',
-    'Panama': '🇵🇦',
-    'Cộng hòa Séc': '🇨🇿',
-    'Bosnia': '🇧🇦',
-    'Thổ Nhĩ Kỳ': '🇹🇷',
-    'Thụy Điển': '🇸🇪',
-    'Iraq': '🇮🇶',
-    'CHDC Congo': '🇨🇩',
-    'TBD': '🏳️'
+  const codeMap = {
+    'Mexico': 'mx',
+    'Nam Phi': 'za',
+    'Hàn Quốc': 'kr',
+    'Canada': 'ca',
+    'Qatar': 'qa',
+    'Thụy Sĩ': 'ch',
+    'Brazil': 'br',
+    'Morocco': 'ma',
+    'Haiti': 'ht',
+    'Scotland': 'gb-sct',
+    'Mỹ': 'us',
+    'Paraguay': 'py',
+    'Úc': 'au',
+    'Đức': 'de',
+    'Ecuador': 'ec',
+    'Bờ Biển Ngà': 'ci',
+    'Curaçao': 'cw',
+    'Hà Lan': 'nl',
+    'Nhật Bản': 'jp',
+    'Tunisia': 'tn',
+    'Bỉ': 'be',
+    'Ai Cập': 'eg',
+    'Iran': 'ir',
+    'New Zealand': 'nz',
+    'Tây Ban Nha': 'es',
+    'Cape Verde': 'cv',
+    'Ả Rập Xê Út': 'sa',
+    'Uruguay': 'uy',
+    'Pháp': 'fr',
+    'Senegal': 'sn',
+    'Na Uy': 'no',
+    'Argentina': 'ar',
+    'Algeria': 'dz',
+    'Áo': 'at',
+    'Jordan': 'jo',
+    'Bồ Đào Nha': 'pt',
+    'Uzbekistan': 'uz',
+    'Colombia': 'co',
+    'Anh': 'gb-eng',
+    'Croatia': 'hr',
+    'Ghana': 'gh',
+    'Panama': 'pa',
+    'Cộng hòa Séc': 'cz',
+    'Bosnia': 'ba',
+    'Thổ Nhĩ Kỳ': 'tr',
+    'Thụy Điển': 'se',
+    'Iraq': 'iq',
+    'CHDC Congo': 'cd'
   };
-  return flags[teamName] || '🏳️';
+
+  const code = codeMap[teamName];
+  if (!code) {
+    return <span style={{ fontSize: '1.2em', verticalAlign: 'middle' }}>🏳️</span>;
+  }
+
+  return (
+    <img 
+      src={`https://flagcdn.com/${code}.svg`} 
+      alt={`${teamName} flag`} 
+      className="flag-img"
+    />
+  );
 }
 
 function MatchCard({ match, onSavePrediction, today, tomorrow }) {
