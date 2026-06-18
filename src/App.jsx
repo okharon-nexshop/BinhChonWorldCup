@@ -302,18 +302,28 @@ export default function App() {
 
           {/* User details, live link & logout */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Live stream link */}
-            <a
-              href="https://vtvgo.vn/channel"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 py-1 px-2 sm:px-3 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 text-[10px] sm:text-xs font-bold hover:bg-red-600/20 hover:border-red-500/40 transition-all animate-pulse"
-              title="Xem trực tiếp VTV"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block" />
-              <span className="hidden sm:inline">Trực Tiếp</span>
-              <span className="sm:hidden">Xem Live</span>
-            </a>
+            {/* Live stream links */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <a
+                href="https://vtvgo.vn/channel"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 py-1 px-1.5 sm:px-2.5 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 text-[9px] sm:text-[11px] font-bold hover:bg-red-600/20 hover:border-red-500/40 transition-all"
+                title="Xem VTVGo"
+              >
+                VTV
+              </a>
+              <a
+                href="https://tieulamlive.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 py-1 px-1.5 sm:px-2.5 rounded-lg bg-purple-600/10 border border-purple-500/20 text-purple-400 text-[9px] sm:text-[11px] font-bold hover:bg-purple-600/20 hover:border-purple-500/40 transition-all animate-pulse"
+                title="Xem Tiếu Lâm Live"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping inline-block" />
+                Tiếu Lâm
+              </a>
+            </div>
 
             {/* User card info */}
             <div 

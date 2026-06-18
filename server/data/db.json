@@ -19,7 +19,8 @@
       "teamHome": "Mexico",
       "teamAway": "Nam Phi",
       "scoreHome": 2,
-      "scoreAway": 0
+      "scoreAway": 0,
+      "finished": true
     },
     {
       "id": "match_2",
@@ -30,7 +31,8 @@
       "teamHome": "Hàn Quốc",
       "teamAway": "Cộng hòa Séc",
       "scoreHome": 2,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_3",
@@ -41,7 +43,8 @@
       "teamHome": "Cộng hòa Séc",
       "teamAway": "Nam Phi",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_4",
@@ -52,7 +55,8 @@
       "teamHome": "Mexico",
       "teamAway": "Hàn Quốc",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_5",
@@ -63,7 +67,8 @@
       "teamHome": "Nam Phi",
       "teamAway": "Hàn Quốc",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_6",
@@ -74,7 +79,8 @@
       "teamHome": "Cộng hòa Séc",
       "teamAway": "Mexico",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_7",
@@ -85,7 +91,8 @@
       "teamHome": "Canada",
       "teamAway": "Bosnia",
       "scoreHome": 1,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_8",
@@ -96,7 +103,8 @@
       "teamHome": "Qatar",
       "teamAway": "Thụy Sĩ",
       "scoreHome": 1,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_9",
@@ -107,7 +115,8 @@
       "teamHome": "Thụy Sĩ",
       "teamAway": "Bosnia",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_10",
@@ -118,7 +127,8 @@
       "teamHome": "Canada",
       "teamAway": "Qatar",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_11",
@@ -129,7 +139,8 @@
       "teamHome": "Thụy Sĩ",
       "teamAway": "Canada",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_12",
@@ -140,7 +151,8 @@
       "teamHome": "Bosnia",
       "teamAway": "Qatar",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_13",
@@ -151,7 +163,8 @@
       "teamHome": "Brazil",
       "teamAway": "Morocco",
       "scoreHome": 1,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_14",
@@ -162,7 +175,8 @@
       "teamHome": "Haiti",
       "teamAway": "Scotland",
       "scoreHome": 0,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_15",
@@ -173,7 +187,8 @@
       "teamHome": "Scotland",
       "teamAway": "Morocco",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_16",
@@ -184,7 +199,8 @@
       "teamHome": "Brazil",
       "teamAway": "Haiti",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_17",
@@ -195,7 +211,8 @@
       "teamHome": "Morocco",
       "teamAway": "Haiti",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_18",
@@ -206,7 +223,8 @@
       "teamHome": "Scotland",
       "teamAway": "Brazil",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_19",
@@ -217,7 +235,8 @@
       "teamHome": "Mỹ",
       "teamAway": "Paraguay",
       "scoreHome": 4,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_20",
@@ -228,7 +247,8 @@
       "teamHome": "Úc",
       "teamAway": "Thổ Nhĩ Kỳ",
       "scoreHome": 2,
-      "scoreAway": 0
+      "scoreAway": 0,
+      "finished": true
     },
     {
       "id": "match_21",
@@ -239,7 +259,8 @@
       "teamHome": "Mỹ",
       "teamAway": "Úc",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_22",
@@ -250,7 +271,8 @@
       "teamHome": "Thổ Nhĩ Kỳ",
       "teamAway": "Paraguay",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_23",
@@ -260,8 +282,9 @@
       "datetime": "2026-06-26T09:00:00+07:00",
       "teamHome": "Mỹ",
       "teamAway": "Thổ Nhĩ Kỳ",
-      "scoreHome": null,
-      "scoreAway": null
+      "scoreHome": 0,
+      "scoreAway": 0,
+      "finished": false
     },
     {
       "id": "match_24",
@@ -272,7 +295,8 @@
       "teamHome": "Paraguay",
       "teamAway": "Úc",
       "scoreHome": null,
-      "scoreAway": null
+      "scoreAway": null,
+      "finished": false
     },
     {
       "id": "match_25",
@@ -283,7 +307,8 @@
       "teamHome": "Đức",
       "teamAway": "Curaçao",
       "scoreHome": 7,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_26",
@@ -294,7 +319,8 @@
       "teamHome": "Bờ Biển Ngà",
       "teamAway": "Ecuador",
       "scoreHome": 1,
-      "scoreAway": 0
+      "scoreAway": 0,
+      "finished": true
     },
     {
       "id": "match_27",
@@ -349,7 +375,8 @@
       "teamHome": "Hà Lan",
       "teamAway": "Nhật Bản",
       "scoreHome": 2,
-      "scoreAway": 2
+      "scoreAway": 2,
+      "finished": true
     },
     {
       "id": "match_32",
@@ -360,7 +387,8 @@
       "teamHome": "Thụy Điển",
       "teamAway": "Tunisia",
       "scoreHome": 5,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_33",
@@ -415,7 +443,8 @@
       "teamHome": "Bỉ",
       "teamAway": "Ai Cập",
       "scoreHome": 1,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_38",
@@ -426,7 +455,8 @@
       "teamHome": "Iran",
       "teamAway": "New Zealand",
       "scoreHome": 2,
-      "scoreAway": 2
+      "scoreAway": 2,
+      "finished": true
     },
     {
       "id": "match_39",
@@ -481,7 +511,8 @@
       "teamHome": "Tây Ban Nha",
       "teamAway": "Cape Verde",
       "scoreHome": 0,
-      "scoreAway": 0
+      "scoreAway": 0,
+      "finished": true
     },
     {
       "id": "match_44",
@@ -492,7 +523,8 @@
       "teamHome": "Ả Rập Xê Út",
       "teamAway": "Uruguay",
       "scoreHome": 1,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_45",
@@ -547,7 +579,8 @@
       "teamHome": "Pháp",
       "teamAway": "Senegal",
       "scoreHome": 3,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_50",
@@ -558,7 +591,8 @@
       "teamHome": "Iraq",
       "teamAway": "Na Uy",
       "scoreHome": 1,
-      "scoreAway": 4
+      "scoreAway": 4,
+      "finished": true
     },
     {
       "id": "match_51",
@@ -613,7 +647,8 @@
       "teamHome": "Argentina",
       "teamAway": "Algeria",
       "scoreHome": 3,
-      "scoreAway": 0
+      "scoreAway": 0,
+      "finished": true
     },
     {
       "id": "match_56",
@@ -624,7 +659,8 @@
       "teamHome": "Áo",
       "teamAway": "Jordan",
       "scoreHome": 3,
-      "scoreAway": 1
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_57",
@@ -678,8 +714,9 @@
       "datetime": "2026-06-18T00:00:00+07:00",
       "teamHome": "Bồ Đào Nha",
       "teamAway": "CHDC Congo",
-      "scoreHome": null,
-      "scoreAway": null
+      "scoreHome": 1,
+      "scoreAway": 1,
+      "finished": true
     },
     {
       "id": "match_62",
@@ -689,8 +726,9 @@
       "datetime": "2026-06-18T09:00:00+07:00",
       "teamHome": "Uzbekistan",
       "teamAway": "Colombia",
-      "scoreHome": null,
-      "scoreAway": null
+      "scoreHome": 0,
+      "scoreAway": 0,
+      "finished": false
     },
     {
       "id": "match_63",
@@ -744,8 +782,9 @@
       "datetime": "2026-06-18T03:00:00+07:00",
       "teamHome": "Anh",
       "teamAway": "Croatia",
-      "scoreHome": null,
-      "scoreAway": null
+      "scoreHome": 4,
+      "scoreAway": 2,
+      "finished": true
     },
     {
       "id": "match_68",
@@ -755,8 +794,9 @@
       "datetime": "2026-06-18T06:00:00+07:00",
       "teamHome": "Ghana",
       "teamAway": "Panama",
-      "scoreHome": null,
-      "scoreAway": null
+      "scoreHome": 1,
+      "scoreAway": 0,
+      "finished": true
     },
     {
       "id": "match_69",
@@ -1190,7 +1230,7 @@
   "predictions": [],
   "settings": {
     "inviteCode": "HOANGVIET2026",
-    "lastAutoUpdate": "2026-06-17",
-    "lastAutoUpdateTimestamp": 1781680387920
+    "lastAutoUpdate": "2026-06-18",
+    "lastAutoUpdateTimestamp": 1781748415756
   }
 }

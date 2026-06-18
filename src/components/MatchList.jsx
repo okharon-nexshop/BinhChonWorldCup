@@ -72,7 +72,12 @@ export function getCountryEmoji(teamName) {
 function MatchCard({ match, onSavePrediction, today, tomorrow }) {
   const { id, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
   const isLive = (() => {
-    if (!match.datetime || match.scoreHome !== null || match.scoreAway !== null) return false;
+    if (!match.datetime) return false;
+    if (match.finished !== undefined) {
+      if (match.finished) return false;
+    } else {
+      if (match.scoreHome !== null && match.scoreAway !== null) return false;
+    }
     const kickoff = new Date(match.datetime).getTime();
     const now = Date.now();
     return now >= kickoff && now <= kickoff + 2.5 * 60 * 60 * 1000;
@@ -355,7 +360,12 @@ export default function MatchList({ matches, onSavePrediction }) {
 
   // 1. Live Matches: kickoff <= now <= kickoff + 2.5 hours
   const liveMatches = matches.filter(m => {
-    if (!m.datetime || m.scoreHome !== null || m.scoreAway !== null) return false;
+    if (!m.datetime) return false;
+    if (m.finished !== undefined) {
+      if (m.finished) return false;
+    } else {
+      if (m.scoreHome !== null && m.scoreAway !== null) return false;
+    }
     const kickoff = new Date(m.datetime);
     return now >= kickoff && now <= new Date(kickoff.getTime() + 2.5 * 60 * 60 * 1000);
   });
@@ -430,24 +440,34 @@ export default function MatchList({ matches, onSavePrediction }) {
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Live TV Streaming Info Alert Box */}
-      <div className="glass-panel border border-red-500/25 bg-red-500/5 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+      <div className="glass-panel border border-red-500/25 bg-red-500/5 p-3.5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0 animate-pulse text-base">
             📺
           </div>
           <div className="text-left">
-            <p className="font-bold text-white leading-tight">Link Xem Trực Tiếp VTVGo</p>
-            <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">Truy cập kênh truyền hình trực tuyến để theo dõi các trận đấu World Cup kịch tính.</p>
+            <p className="font-bold text-white leading-tight">Xem Trực Tiếp Trận Đấu</p>
+            <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">Theo dõi trực tiếp các trận đấu kịch tính qua các kênh truyền hình trực tuyến.</p>
           </div>
         </div>
-        <a
-          href="https://vtvgo.vn/channel"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-primary bg-red-600 border-red-500 text-black hover:bg-red-500 px-4 py-1.5 text-xs font-bold rounded-lg whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.15)]"
-        >
-          <span>Xem Ngay</span> 🔴
-        </a>
+        <div className="flex gap-2.5 w-full md:w-auto justify-end">
+          <a
+            href="https://vtvgo.vn/channel"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary bg-red-600 border-red-500 text-black hover:bg-red-500 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.15)] flex-grow md:flex-grow-0 justify-center"
+          >
+            <span>VTVGo</span> 🔴
+          </a>
+          <a
+            href="https://tieulamlive.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary bg-purple-600 border-purple-500 text-white hover:bg-purple-500 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_15px_rgba(147,51,234,0.15)] flex-grow md:flex-grow-0 justify-center"
+          >
+            <span>Tiếu Lâm Live</span> ⚡
+          </a>
+        </div>
       </div>
       {/* Filters/Tabs bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">

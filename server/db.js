@@ -417,7 +417,9 @@ const teamTranslation = {
   "England": "Anh",
   "Croatia": "Croatia",
   "Ghana": "Ghana",
-  "Panama": "Panama"
+  "Panama": "Panama",
+  "Bosnia and Herzegovina": "Bosnia",
+  "Democratic Republic of the Congo": "CHDC Congo"
 };
 
 export async function autoUpdateScores(db, force = false) {
@@ -429,7 +431,7 @@ export async function autoUpdateScores(db, force = false) {
   
   // Check if any match is currently "live" (started, within 2.5 hours, and score not yet confirmed)
   const hasLiveMatch = Array.isArray(db.matches) && db.matches.some(m => {
-    if (!m.datetime || m.scoreHome !== null) return false;
+    if (!m.datetime || m.finished) return false;
     const kickoff = new Date(m.datetime).getTime();
     return now >= kickoff && now <= kickoff + 2.5 * 60 * 60 * 1000;
   });
@@ -444,105 +446,199 @@ export async function autoUpdateScores(db, force = false) {
   const todayGMT7 = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0];
   
   console.log(`Checking for automatic match score updates for ${todayGMT7} (force=${force})...`);
+  
+  // Translation helper for team names & placeholders
+  const translateTeamName = (name) => {
+    if (!name) return '';
+    if (teamTranslation[name]) return teamTranslation[name];
+    
+    // Placeholders: Wxx -> Thắng Trận xx, Lxx -> Thua Trận xx
+    if (name.startsWith('W') && !isNaN(name.substring(1))) {
+      return `Thắng Trận ${name.substring(1)}`;
+    }
+    if (name.startsWith('L') && !isNaN(name.substring(1))) {
+      return `Thua Trận ${name.substring(1)}`;
+    }
+    // Group placeholders: 1A, 2B, 3A/B...
+    if (/^[123][A-L]/.test(name)) {
+      const rank = name[0] === '1' ? 'Nhất' : (name[0] === '2' ? 'Nhì' : 'Hạng 3');
+      const groupName = name.substring(1);
+      return `${rank} ${groupName}`;
+    }
+    return name;
+  };
+
+  // 1. Attempt to fetch from worldcup26.ir API (Primary source with live scores)
   try {
-    const res = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
+    console.log('Fetching live scores from worldcup26.ir API...');
+    const res = await fetch('https://worldcup26.ir/get/games');
     if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      throw new Error(`worldcup26.ir returned HTTP status ${res.status}`);
     }
     const data = await res.json();
-    if (!data || !Array.isArray(data.matches)) {
-      throw new Error('Invalid JSON format from openfootball');
+    if (!data || !Array.isArray(data.games)) {
+      throw new Error('Invalid JSON format from worldcup26.ir');
     }
-    
-    let updatedCount = 0;
-    
-    // Translation helper for team names & placeholders
-    const translateTeamName = (name) => {
-      if (!name) return '';
-      if (teamTranslation[name]) return teamTranslation[name];
-      
-      // Placeholders: Wxx -> Thắng Trận xx, Lxx -> Thua Trận xx
-      if (name.startsWith('W') && !isNaN(name.substring(1))) {
-        return `Thắng Trận ${name.substring(1)}`;
-      }
-      if (name.startsWith('L') && !isNaN(name.substring(1))) {
-        return `Thua Trận ${name.substring(1)}`;
-      }
-      // Group placeholders: 1A, 2B, 3A/B...
-      if (/^[123][A-L]/.test(name)) {
-        const rank = name[0] === '1' ? 'Nhất' : (name[0] === '2' ? 'Nhì' : 'Hạng 3');
-        const groupName = name.substring(1);
-        return `${rank} ${groupName}`;
-      }
-      return name;
-    };
 
-    for (const item of data.matches) {
-      const homeEng = item.team1;
-      const awayEng = item.team2;
+    let updatedCount = 0;
+    for (const item of data.games) {
+      const homeViet = translateTeamName(item.home_team_name_en);
+      const awayViet = translateTeamName(item.away_team_name_en);
       
-      const homeViet = translateTeamName(homeEng);
-      const awayViet = translateTeamName(awayEng);
+      const gameIdNum = parseInt(item.id, 10);
+      let matchIdx = -1;
       
-      if (item.num !== undefined) {
-        // Knockout match: locate by match number
-        const matchId = `match_${item.num}`;
-        const matchIdx = db.matches.findIndex(m => m.id === matchId);
-        if (matchIdx !== -1) {
-          const m = db.matches[matchIdx];
-          let changed = false;
-          
-          if (m.teamHome !== homeViet) {
-            db.matches[matchIdx].teamHome = homeViet;
-            changed = true;
-          }
-          if (m.teamAway !== awayViet) {
-            db.matches[matchIdx].teamAway = awayViet;
-            changed = true;
-          }
-          
-          if (item.score && Array.isArray(item.score.ft)) {
-            const scoreHome = item.score.ft[0];
-            const scoreAway = item.score.ft[1];
-            if (m.scoreHome !== scoreHome || m.scoreAway !== scoreAway) {
-              db.matches[matchIdx].scoreHome = scoreHome;
-              db.matches[matchIdx].scoreAway = scoreAway;
+      if (item.type !== 'group' && gameIdNum >= 73) {
+        // Knockout stage match: locate by ID (since they match 1:1)
+        const matchId = `match_${item.id}`;
+        matchIdx = db.matches.findIndex(m => m.id === matchId);
+      } else {
+        // Group stage match: locate by team names (since IDs don't match our database seed order)
+        if (homeViet && awayViet) {
+          matchIdx = db.matches.findIndex(m => m.teamHome === homeViet && m.teamAway === awayViet);
+        }
+      }
+
+      if (matchIdx !== -1) {
+        const m = db.matches[matchIdx];
+        let changed = false;
+
+        // Propagate knockout stage actual team names if they are determined
+        if (item.type !== 'group' && gameIdNum >= 73) {
+          if (item.home_team_id !== '0' && item.home_team_name_en) {
+            const homeVietTranslated = translateTeamName(item.home_team_name_en);
+            if (m.teamHome !== homeVietTranslated) {
+              db.matches[matchIdx].teamHome = homeVietTranslated;
               changed = true;
             }
           }
-          
-          if (changed) {
-            updatedCount++;
+          if (item.away_team_id !== '0' && item.away_team_name_en) {
+            const awayVietTranslated = translateTeamName(item.away_team_name_en);
+            if (m.teamAway !== awayVietTranslated) {
+              db.matches[matchIdx].teamAway = awayVietTranslated;
+              changed = true;
+            }
           }
         }
-      } else {
-        // Group match: locate by team names
-        if (item.score && Array.isArray(item.score.ft)) {
-          if (homeViet && awayViet) {
-            const matchIdx = db.matches.findIndex(m => m.teamHome === homeViet && m.teamAway === awayViet);
-            if (matchIdx !== -1) {
-              const m = db.matches[matchIdx];
+
+        // Update score and finished status
+        if (item.time_elapsed === 'notstarted' && item.finished !== 'TRUE') {
+          // Reset score to null if the game has not started yet (self-healing for bad DB records)
+          if (m.scoreHome !== null || m.scoreAway !== null || m.finished) {
+            db.matches[matchIdx].scoreHome = null;
+            db.matches[matchIdx].scoreAway = null;
+            db.matches[matchIdx].finished = false;
+            changed = true;
+          }
+        } else if (item.time_elapsed !== 'notstarted' || item.finished === 'TRUE') {
+          const scoreHome = parseInt(item.home_score, 10);
+          const scoreAway = parseInt(item.away_score, 10);
+          if (!isNaN(scoreHome) && !isNaN(scoreAway)) {
+            const isFinished = item.finished === 'TRUE';
+            if (m.scoreHome !== scoreHome || m.scoreAway !== scoreAway || m.finished !== isFinished) {
+              db.matches[matchIdx].scoreHome = scoreHome;
+              db.matches[matchIdx].scoreAway = scoreAway;
+              db.matches[matchIdx].finished = isFinished;
+              changed = true;
+            }
+          }
+        }
+
+        if (changed) {
+          updatedCount++;
+        }
+      }
+    }
+
+    db.settings.lastAutoUpdate = todayGMT7;
+    db.settings.lastAutoUpdateTimestamp = now;
+    console.log(`Automatic score updates (worldcup26.ir) completed. Updated ${updatedCount} matches.`);
+    return { db, updated: updatedCount > 0 };
+  } catch (apiError) {
+    console.warn('worldcup26.ir API failed, falling back to openfootball:', apiError.message);
+    
+    // 2. Fallback to openfootball worldcup.json
+    try {
+      const res = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
+      if (!res.ok) {
+        throw new Error(`openfootball HTTP status ${res.status}`);
+      }
+      const data = await res.json();
+      if (!data || !Array.isArray(data.matches)) {
+        throw new Error('Invalid JSON format from openfootball');
+      }
+
+      let updatedCount = 0;
+      for (const item of data.matches) {
+        const homeEng = item.team1;
+        const awayEng = item.team2;
+        const homeViet = translateTeamName(homeEng);
+        const awayViet = translateTeamName(awayEng);
+
+        if (item.num !== undefined) {
+          // Knockout match: locate by match number
+          const matchId = `match_${item.num}`;
+          const matchIdx = db.matches.findIndex(m => m.id === matchId);
+          if (matchIdx !== -1) {
+            const m = db.matches[matchIdx];
+            let changed = false;
+
+            if (m.teamHome !== homeViet) {
+              db.matches[matchIdx].teamHome = homeViet;
+              changed = true;
+            }
+            if (m.teamAway !== awayViet) {
+              db.matches[matchIdx].teamAway = awayViet;
+              changed = true;
+            }
+
+            if (item.score && Array.isArray(item.score.ft)) {
               const scoreHome = item.score.ft[0];
               const scoreAway = item.score.ft[1];
-              
-              if (m.scoreHome === null || m.scoreAway === null || m.scoreHome !== scoreHome || m.scoreAway !== scoreAway) {
+              const isFinished = true;
+              if (m.scoreHome !== scoreHome || m.scoreAway !== scoreAway || m.finished !== isFinished) {
                 db.matches[matchIdx].scoreHome = scoreHome;
                 db.matches[matchIdx].scoreAway = scoreAway;
-                updatedCount++;
+                db.matches[matchIdx].finished = isFinished;
+                changed = true;
+              }
+            }
+
+            if (changed) {
+              updatedCount++;
+            }
+          }
+        } else {
+          // Group match: locate by team names
+          if (item.score && Array.isArray(item.score.ft)) {
+            if (homeViet && awayViet) {
+              const matchIdx = db.matches.findIndex(m => m.teamHome === homeViet && m.teamAway === awayViet);
+              if (matchIdx !== -1) {
+                const m = db.matches[matchIdx];
+                const scoreHome = item.score.ft[0];
+                const scoreAway = item.score.ft[1];
+                const isFinished = true;
+
+                if (m.scoreHome !== scoreHome || m.scoreAway !== scoreAway || m.finished !== isFinished) {
+                  db.matches[matchIdx].scoreHome = scoreHome;
+                  db.matches[matchIdx].scoreAway = scoreAway;
+                  db.matches[matchIdx].finished = isFinished;
+                  updatedCount++;
+                }
               }
             }
           }
         }
       }
+
+      db.settings.lastAutoUpdate = todayGMT7;
+      db.settings.lastAutoUpdateTimestamp = now;
+      console.log(`Automatic score updates (openfootball fallback) completed. Updated ${updatedCount} matches.`);
+      return { db, updated: updatedCount > 0 };
+    } catch (fallbackError) {
+      console.error('All auto-update scores sources failed:', fallbackError);
+      return { db, updated: false };
     }
-    
-    db.settings.lastAutoUpdate = todayGMT7;
-    db.settings.lastAutoUpdateTimestamp = now;
-    console.log(`Automatic score updates completed. Updated ${updatedCount} matches.`);
-    return { db, updated: updatedCount > 0 };
-  } catch (err) {
-    console.error('Failed to run automatic score updates:', err);
-    return { db, updated: false };
   }
 }
 
