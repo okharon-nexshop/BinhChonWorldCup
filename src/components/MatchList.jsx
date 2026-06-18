@@ -198,9 +198,25 @@ function MatchCard({ match, onSavePrediction, today, tomorrow }) {
           <span className="flag-inline flex-shrink-0">{getCountryEmoji(teamHome)}</span>
           
           {scoreHome !== null && scoreAway !== null ? (
-            <span className="text-lg font-black bg-cyan-950/20 text-cyan-400 px-3 py-1 rounded-xl border border-cyan-500/20 glow-text-blue font-mono">
-              {scoreHome} - {scoreAway}
-            </span>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-lg font-black bg-cyan-950/20 text-cyan-400 px-3 py-1 rounded-xl border border-cyan-500/20 glow-text-blue font-mono">
+                {scoreHome} - {scoreAway}
+              </span>
+              {isLive && (
+                <span className="text-[8px] text-emerald-400 font-extrabold uppercase tracking-widest animate-pulse mt-0.5">
+                  Tỷ số Live
+                </span>
+              )}
+            </div>
+          ) : isLive ? (
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-lg font-black bg-cyan-950/20 text-cyan-400 px-3 py-1 rounded-xl border border-cyan-500/20 glow-text-blue font-mono animate-pulse">
+                0 - 0
+              </span>
+              <span className="text-[8px] text-emerald-400 font-extrabold uppercase tracking-widest mt-0.5">
+                Tỷ số Live
+              </span>
+            </div>
           ) : (
             <span className="text-[10px] uppercase tracking-wider font-extrabold text-gray-500 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5">
               VS

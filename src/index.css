@@ -1073,15 +1073,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .live-matches-container {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 16px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-@media (min-width: 768px) {
-  .live-matches-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.live-matches-container .match-card {
+  width: 100%;
+  max-width: 420px;
 }
 
 
