@@ -578,18 +578,18 @@ export default function MatchList({ matches, onSavePrediction, onFlagClick }) {
   // Compute today's date formatted as DD/MM in GMT+7
   const today = (() => {
     const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const gmt7Time = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const day = String(gmt7Time.getUTCDate()).padStart(2, '0');
+    const month = String(gmt7Time.getUTCMonth() + 1).padStart(2, '0');
     return `${day}/${month}`;
   })();
 
   // Compute tomorrow's date formatted as DD/MM in GMT+7
   const tomorrow = (() => {
     const now = new Date();
-    const tmr = new Date(now);
-    tmr.setDate(now.getDate() + 1);
-    const day = String(tmr.getDate()).padStart(2, '0');
-    const month = String(tmr.getMonth() + 1).padStart(2, '0');
+    const tmr = new Date(now.getTime() + 24 * 60 * 60 * 1000 + 7 * 60 * 60 * 1000);
+    const day = String(tmr.getUTCDate()).padStart(2, '0');
+    const month = String(tmr.getUTCMonth() + 1).padStart(2, '0');
     return `${day}/${month}`;
   })();
 

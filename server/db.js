@@ -119,38 +119,38 @@ const seededMatches = groupMatches.map((m, idx) => ({
 
 // World Cup 2026 Knockout stage matches (73 to 104)
 const knockoutMatches = [
-  { id: "match_73", num: 73, group: "Round of 32", date: "28/06", time: "12:00", datetime: "2026-06-28T12:00:00+07:00", teamHome: "2A", teamAway: "2B", scoreHome: null, scoreAway: null },
-  { id: "match_74", num: 74, group: "Round of 32", date: "29/06", time: "16:30", datetime: "2026-06-29T16:30:00+07:00", teamHome: "1E", teamAway: "3A/B/C/D/F", scoreHome: null, scoreAway: null },
-  { id: "match_75", num: 75, group: "Round of 32", date: "29/06", time: "19:00", datetime: "2026-06-29T19:00:00+07:00", teamHome: "1F", teamAway: "2C", scoreHome: null, scoreAway: null },
-  { id: "match_76", num: 76, group: "Round of 32", date: "29/06", time: "12:00", datetime: "2026-06-29T12:00:00+07:00", teamHome: "1C", teamAway: "2F", scoreHome: null, scoreAway: null },
-  { id: "match_77", num: 77, group: "Round of 32", date: "30/06", time: "17:00", datetime: "2026-06-30T17:00:00+07:00", teamHome: "1I", teamAway: "3C/D/F/G/H", scoreHome: null, scoreAway: null },
-  { id: "match_78", num: 78, group: "Round of 32", date: "30/06", time: "12:00", datetime: "2026-06-30T12:00:00+07:00", teamHome: "2E", teamAway: "2I", scoreHome: null, scoreAway: null },
-  { id: "match_79", num: 79, group: "Round of 32", date: "30/06", time: "19:00", datetime: "2026-06-30T19:00:00+07:00", teamHome: "1A", teamAway: "3C/E/F/H/I", scoreHome: null, scoreAway: null },
-  { id: "match_80", num: 80, group: "Round of 32", date: "01/07", time: "12:00", datetime: "2026-07-01T12:00:00+07:00", teamHome: "1L", teamAway: "3E/H/I/J/K", scoreHome: null, scoreAway: null },
-  { id: "match_81", num: 81, group: "Round of 32", date: "01/07", time: "17:00", datetime: "2026-07-01T17:00:00+07:00", teamHome: "1D", teamAway: "3B/E/F/I/J", scoreHome: null, scoreAway: null },
-  { id: "match_82", num: 82, group: "Round of 32", date: "01/07", time: "13:00", datetime: "2026-07-01T13:00:00+07:00", teamHome: "1G", teamAway: "3A/E/H/I/J", scoreHome: null, scoreAway: null },
-  { id: "match_83", num: 83, group: "Round of 32", date: "02/07", time: "19:00", datetime: "2026-07-02T19:00:00+07:00", teamHome: "2K", teamAway: "2L", scoreHome: null, scoreAway: null },
-  { id: "match_84", num: 84, group: "Round of 32", date: "02/07", time: "12:00", datetime: "2026-07-02T12:00:00+07:00", teamHome: "1H", teamAway: "2J", scoreHome: null, scoreAway: null },
-  { id: "match_85", num: 85, group: "Round of 32", date: "02/07", time: "20:00", datetime: "2026-07-02T20:00:00+07:00", teamHome: "1B", teamAway: "3E/F/G/I/J", scoreHome: null, scoreAway: null },
-  { id: "match_86", num: 86, group: "Round of 32", date: "03/07", time: "18:00", datetime: "2026-07-03T18:00:00+07:00", teamHome: "1J", teamAway: "2H", scoreHome: null, scoreAway: null },
-  { id: "match_87", num: 87, group: "Round of 32", date: "03/07", time: "20:30", datetime: "2026-07-03T20:30:00+07:00", teamHome: "1K", teamAway: "3D/E/I/J/L", scoreHome: null, scoreAway: null },
-  { id: "match_88", num: 88, group: "Round of 32", date: "03/07", time: "13:00", datetime: "2026-07-03T13:00:00+07:00", teamHome: "2D", teamAway: "2G", scoreHome: null, scoreAway: null },
-  { id: "match_89", num: 89, group: "Round of 16", date: "04/07", time: "17:00", datetime: "2026-07-04T17:00:00+07:00", teamHome: "W74", teamAway: "W77", scoreHome: null, scoreAway: null },
-  { id: "match_90", num: 90, group: "Round of 16", date: "04/07", time: "12:00", datetime: "2026-07-04T12:00:00+07:00", teamHome: "W73", teamAway: "W75", scoreHome: null, scoreAway: null },
-  { id: "match_91", num: 91, group: "Round of 16", date: "05/07", time: "16:00", datetime: "2026-07-05T16:00:00+07:00", teamHome: "W76", teamAway: "W78", scoreHome: null, scoreAway: null },
-  { id: "match_92", num: 92, group: "Round of 16", date: "05/07", time: "18:00", datetime: "2026-07-05T18:00:00+07:00", teamHome: "W79", teamAway: "W80", scoreHome: null, scoreAway: null },
-  { id: "match_93", num: 93, group: "Round of 16", date: "06/07", time: "14:00", datetime: "2026-07-06T14:00:00+07:00", teamHome: "W83", teamAway: "W84", scoreHome: null, scoreAway: null },
-  { id: "match_94", num: 94, group: "Round of 16", date: "06/07", time: "17:00", datetime: "2026-07-06T17:00:00+07:00", teamHome: "W81", teamAway: "W82", scoreHome: null, scoreAway: null },
-  { id: "match_95", num: 95, group: "Round of 16", date: "07/07", time: "12:00", datetime: "2026-07-07T12:00:00+07:00", teamHome: "W86", teamAway: "W88", scoreHome: null, scoreAway: null },
-  { id: "match_96", num: 96, group: "Round of 16", date: "07/07", time: "13:00", datetime: "2026-07-07T13:00:00+07:00", teamHome: "W85", teamAway: "W87", scoreHome: null, scoreAway: null },
-  { id: "match_97", num: 97, group: "Quarter-final", date: "09/07", time: "16:00", datetime: "2026-07-09T16:00:00+07:00", teamHome: "W89", teamAway: "W90", scoreHome: null, scoreAway: null },
-  { id: "match_98", num: 98, group: "Quarter-final", date: "10/07", time: "12:00", datetime: "2026-07-10T12:00:00+07:00", teamHome: "W93", teamAway: "W94", scoreHome: null, scoreAway: null },
-  { id: "match_99", num: 99, group: "Quarter-final", date: "11/07", time: "17:00", datetime: "2026-07-11T17:00:00+07:00", teamHome: "W91", teamAway: "W92", scoreHome: null, scoreAway: null },
-  { id: "match_100", num: 100, group: "Quarter-final", date: "11/07", time: "20:00", datetime: "2026-07-11T20:00:00+07:00", teamHome: "W95", teamAway: "W96", scoreHome: null, scoreAway: null },
-  { id: "match_101", num: 101, group: "Semi-final", date: "14/07", time: "14:00", datetime: "2026-07-14T14:00:00+07:00", teamHome: "W97", teamAway: "W98", scoreHome: null, scoreAway: null },
-  { id: "match_102", num: 102, group: "Semi-final", date: "15/07", time: "15:00", datetime: "2026-07-15T15:00:00+07:00", teamHome: "W99", teamAway: "W100", scoreHome: null, scoreAway: null },
-  { id: "match_103", num: 103, group: "Match for third place", date: "18/07", time: "17:00", datetime: "2026-07-18T17:00:00+07:00", teamHome: "L101", teamAway: "L102", scoreHome: null, scoreAway: null },
-  { id: "match_104", num: 104, group: "Final", date: "19/07", time: "15:00", datetime: "2026-07-19T15:00:00+07:00", teamHome: "W101", teamAway: "W102", scoreHome: null, scoreAway: null }
+  { id: "match_73", num: 73, group: "Round of 32", date: "29/06", time: "02:00", datetime: "2026-06-29T02:00:00+07:00", teamHome: "Nhì A", teamAway: "Nhì B", scoreHome: null, scoreAway: null },
+  { id: "match_74", num: 74, group: "Round of 32", date: "30/06", time: "03:30", datetime: "2026-06-30T03:30:00+07:00", teamHome: "Nhất E", teamAway: "Hạng 3 A/B/C/D/F", scoreHome: null, scoreAway: null },
+  { id: "match_75", num: 75, group: "Round of 32", date: "30/06", time: "08:00", datetime: "2026-06-30T08:00:00+07:00", teamHome: "Nhất F", teamAway: "Nhì C", scoreHome: null, scoreAway: null },
+  { id: "match_76", num: 76, group: "Round of 32", date: "30/06", time: "00:00", datetime: "2026-06-30T00:00:00+07:00", teamHome: "Nhất C", teamAway: "Nhì F", scoreHome: null, scoreAway: null },
+  { id: "match_77", num: 77, group: "Round of 32", date: "01/07", time: "04:00", datetime: "2026-07-01T04:00:00+07:00", teamHome: "Nhất I", teamAway: "Hạng 3 C/D/F/G/H", scoreHome: null, scoreAway: null },
+  { id: "match_78", num: 78, group: "Round of 32", date: "30/06", time: "23:00", datetime: "2026-06-30T23:00:00+07:00", teamHome: "Nhì E", teamAway: "Nhì I", scoreHome: null, scoreAway: null },
+  { id: "match_79", num: 79, group: "Round of 32", date: "01/07", time: "08:00", datetime: "2026-07-01T08:00:00+07:00", teamHome: "Nhất A", teamAway: "Hạng 3 C/E/F/H/I", scoreHome: null, scoreAway: null },
+  { id: "match_80", num: 80, group: "Round of 32", date: "01/07", time: "23:00", datetime: "2026-07-01T23:00:00+07:00", teamHome: "Nhất L", teamAway: "Hạng 3 E/H/I/J/K", scoreHome: null, scoreAway: null },
+  { id: "match_81", num: 81, group: "Round of 32", date: "02/07", time: "07:00", datetime: "2026-07-02T07:00:00+07:00", teamHome: "Nhất D", teamAway: "Hạng 3 B/E/F/I/J", scoreHome: null, scoreAway: null },
+  { id: "match_82", num: 82, group: "Round of 32", date: "02/07", time: "03:00", datetime: "2026-07-02T03:00:00+07:00", teamHome: "Nhất G", teamAway: "Hạng 3 A/E/H/I/J", scoreHome: null, scoreAway: null },
+  { id: "match_83", num: 83, group: "Round of 32", date: "03/07", time: "06:00", datetime: "2026-07-03T06:00:00+07:00", teamHome: "Nhì K", teamAway: "Nhì L", scoreHome: null, scoreAway: null },
+  { id: "match_84", num: 84, group: "Round of 32", date: "03/07", time: "02:00", datetime: "2026-07-03T02:00:00+07:00", teamHome: "Nhất H", teamAway: "Nhì J", scoreHome: null, scoreAway: null },
+  { id: "match_85", num: 85, group: "Round of 32", date: "03/07", time: "10:00", datetime: "2026-07-03T10:00:00+07:00", teamHome: "Nhất B", teamAway: "Hạng 3 E/F/G/I/J", scoreHome: null, scoreAway: null },
+  { id: "match_86", num: 86, group: "Round of 32", date: "04/07", time: "05:00", datetime: "2026-07-04T05:00:00+07:00", teamHome: "Nhất J", teamAway: "Nhì H", scoreHome: null, scoreAway: null },
+  { id: "match_87", num: 87, group: "Round of 32", date: "04/07", time: "08:30", datetime: "2026-07-04T08:30:00+07:00", teamHome: "Nhất K", teamAway: "Hạng 3 D/E/I/J/L", scoreHome: null, scoreAway: null },
+  { id: "match_88", num: 88, group: "Round of 32", date: "04/07", time: "01:00", datetime: "2026-07-04T01:00:00+07:00", teamHome: "Nhì D", teamAway: "Nhì G", scoreHome: null, scoreAway: null },
+  { id: "match_89", num: 89, group: "Round of 16", date: "05/07", time: "04:00", datetime: "2026-07-05T04:00:00+07:00", teamHome: "Thắng Trận 74", teamAway: "Thắng Trận 77", scoreHome: null, scoreAway: null },
+  { id: "match_90", num: 90, group: "Round of 16", date: "05/07", time: "00:00", datetime: "2026-07-05T00:00:00+07:00", teamHome: "Thắng Trận 73", teamAway: "Thắng Trận 75", scoreHome: null, scoreAway: null },
+  { id: "match_91", num: 91, group: "Round of 16", date: "06/07", time: "03:00", datetime: "2026-07-06T03:00:00+07:00", teamHome: "Thắng Trận 76", teamAway: "Thắng Trận 78", scoreHome: null, scoreAway: null },
+  { id: "match_92", num: 92, group: "Round of 16", date: "06/07", time: "07:00", datetime: "2026-07-06T07:00:00+07:00", teamHome: "Thắng Trận 79", teamAway: "Thắng Trận 80", scoreHome: null, scoreAway: null },
+  { id: "match_93", num: 93, group: "Round of 16", date: "07/07", time: "02:00", datetime: "2026-07-07T02:00:00+07:00", teamHome: "Thắng Trận 83", teamAway: "Thắng Trận 84", scoreHome: null, scoreAway: null },
+  { id: "match_94", num: 94, group: "Round of 16", date: "07/07", time: "07:00", datetime: "2026-07-07T07:00:00+07:00", teamHome: "Thắng Trận 81", teamAway: "Thắng Trận 82", scoreHome: null, scoreAway: null },
+  { id: "match_95", num: 95, group: "Round of 16", date: "07/07", time: "23:00", datetime: "2026-07-07T23:00:00+07:00", teamHome: "Thắng Trận 85", teamAway: "Thắng Trận 87", scoreHome: null, scoreAway: null },
+  { id: "match_96", num: 96, group: "Round of 16", date: "08/07", time: "03:00", datetime: "2026-07-08T03:00:00+07:00", teamHome: "Thắng Trận 86", teamAway: "Thắng Trận 88", scoreHome: null, scoreAway: null },
+  { id: "match_97", num: 97, group: "Quarter-final", date: "10/07", time: "03:00", datetime: "2026-07-10T03:00:00+07:00", teamHome: "Thắng Trận 89", teamAway: "Thắng Trận 90", scoreHome: null, scoreAway: null },
+  { id: "match_98", num: 98, group: "Quarter-final", date: "11/07", time: "02:00", datetime: "2026-07-11T02:00:00+07:00", teamHome: "Thắng Trận 93", teamAway: "Thắng Trận 94", scoreHome: null, scoreAway: null },
+  { id: "match_99", num: 99, group: "Quarter-final", date: "12/07", time: "04:00", datetime: "2026-07-12T04:00:00+07:00", teamHome: "Thắng Trận 91", teamAway: "Thắng Trận 92", scoreHome: null, scoreAway: null },
+  { id: "match_100", num: 100, group: "Quarter-final", date: "12/07", time: "08:00", datetime: "2026-07-12T08:00:00+07:00", teamHome: "Thắng Trận 95", teamAway: "Thắng Trận 96", scoreHome: null, scoreAway: null },
+  { id: "match_101", num: 101, group: "Semi-final", date: "15/07", time: "02:00", datetime: "2026-07-15T02:00:00+07:00", teamHome: "Thắng Trận 97", teamAway: "Thắng Trận 98", scoreHome: null, scoreAway: null },
+  { id: "match_102", num: 102, group: "Semi-final", date: "16/07", time: "02:00", datetime: "2026-07-16T02:00:00+07:00", teamHome: "Thắng Trận 99", teamAway: "Thắng Trận 100", scoreHome: null, scoreAway: null },
+  { id: "match_103", num: 103, group: "Match for third place", date: "19/07", time: "04:00", datetime: "2026-07-19T04:00:00+07:00", teamHome: "Thua Trận 101", teamAway: "Thua Trận 102", scoreHome: null, scoreAway: null },
+  { id: "match_104", num: 104, group: "Final", date: "20/07", time: "02:00", datetime: "2026-07-20T02:00:00+07:00", teamHome: "Thắng Trận 101", teamAway: "Thắng Trận 102", scoreHome: null, scoreAway: null }
 ];
 
 // Initialize database template
@@ -217,6 +217,9 @@ function migrateDatabase(db) {
       let teamAway = m.teamAway;
       let scoreHome = m.scoreHome;
       let scoreAway = m.scoreAway;
+      let date = m.date;
+      let time = m.time;
+      let datetime = m.datetime;
 
       // 1. Migrate TBD team names (only group stage matches)
       if (!m.num) {
@@ -238,11 +241,22 @@ function migrateDatabase(db) {
             updated = true;
           }
         }
+      } else {
+        // 3. Migrate kickoff times for knockout matches from correct configuration
+        const koMatch = knockoutMatches.find(ko => ko.id === m.id);
+        if (koMatch) {
+          if (m.date !== koMatch.date || m.time !== koMatch.time || m.datetime !== koMatch.datetime) {
+            date = koMatch.date;
+            time = koMatch.time;
+            datetime = koMatch.datetime;
+            updated = true;
+          }
+        }
       }
 
       if (updated) {
         needsMigration = true;
-        return { ...m, teamHome, teamAway, scoreHome, scoreAway };
+        return { ...m, teamHome, teamAway, scoreHome, scoreAway, date, time, datetime };
       }
       return m;
     });
