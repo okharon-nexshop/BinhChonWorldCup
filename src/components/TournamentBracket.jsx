@@ -26,6 +26,32 @@ function isPlaceholder(teamName) {
   return teamName.startsWith('W') || teamName.startsWith('L') || /^[123][A-L]/.test(teamName);
 }
 
+const nextMatchMap = {
+  73: 90, 75: 90,
+  74: 89, 77: 89,
+  76: 91, 78: 91,
+  79: 92, 80: 92,
+  81: 94, 82: 94,
+  83: 93, 84: 93,
+  85: 95, 87: 95,
+  86: 96, 88: 96,
+  89: 97, 90: 97,
+  91: 99, 92: 99,
+  93: 98, 94: 98,
+  95: 100, 96: 100,
+  97: 101, 98: 101,
+  99: 102, 100: 102,
+  101: 104, 102: 104
+};
+
+function getNextMatchText(num) {
+  if (num === 103) return null;
+  if (num === 104) return null;
+  if (num === 101 || num === 102) return 'Chung kết & Hạng 3';
+  const next = nextMatchMap[num];
+  return next ? `➔ Trận ${next}` : null;
+}
+
 // Individual Match Node in the Bracket
 function MatchNode({ match, onClick, today, tomorrow, onFlagClick }) {
   const { id, num, group, date, time, teamHome, teamAway, scoreHome, scoreAway, isLocked, prediction } = match;
@@ -74,6 +100,11 @@ function MatchNode({ match, onClick, today, tomorrow, onFlagClick }) {
       {/* Node Header */}
       <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-gray-500 mb-1.5 border-b border-white/5 pb-1">
         <span className="font-bold font-mono text-gray-400">#TRẬN {num}</span>
+        {getNextMatchText(num) && (
+          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+            {getNextMatchText(num)}
+          </span>
+        )}
         <span className="flex items-center gap-1">
           <Calendar size={11} /> {date} {time}
         </span>
@@ -195,13 +226,6 @@ function renderAnalysis(text) {
 export default function TournamentBracket({ matches, onSavePrediction, onFlagClick }) {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [activeMobileTab, setActiveMobileTab] = useState('r32'); // 'r32', 'r16', 'qf', 'sf', 'final'
-  const [bracketMode, setBracketMode] = useState('group'); // 'group' or 'knockout'
-  const [selectedGroup, setSelectedGroup] = useState('Bảng A');
-
-  const groupsList = [
-    'Bảng A', 'Bảng B', 'Bảng C', 'Bảng D', 'Bảng E', 'Bảng F',
-    'Bảng G', 'Bảng H', 'Bảng I', 'Bảng J', 'Bảng K', 'Bảng L'
-  ];
 
   // Input states for prediction modal
   const [predHome, setPredHome] = useState('');
@@ -279,9 +303,7 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
     champion = finalMatch.scoreHome > finalMatch.scoreAway ? finalMatch.teamHome : finalMatch.teamAway;
   }
 
-  // Active group data
-  const activeGroupMatches = matches.filter(m => m.group === selectedGroup);
-  const activeGroupStandings = getGroupStandings(activeGroupMatches);
+
 
   // Open prediction modal
   const handleNodeClick = (match) => {
@@ -352,353 +374,238 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-[fadeIn_0.3s_ease]">
       {/* Title section */}
       <div className="text-center sm:text-left flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            🏆 Sơ Đồ & Tiến Trình Giải Đấu
+            🏆 Sơ Đồ Thi Đấu Vòng Loại Trực Tiếp
           </h2>
           <p className="text-xs text-gray-400 mt-1">
-            Bình chọn trực tiếp bằng cách nhấn vào các trận đang mở. Tự động cập nhật theo tỷ số thực tế.
+            Bình chọn trực tiếp bằng cách nhấn vào các trận đấu đang mở. Kết quả tự động cập nhật theo tỷ số thực tế.
           </p>
         </div>
       </div>
 
-      {/* Mode Switcher Tab */}
-      <div className="flex justify-center sm:justify-start">
-        <div className="inline-flex p-1 bg-black/40 rounded-xl border border-white/5">
-          <button
-            type="button"
-            className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              bracketMode === 'group'
-                ? 'bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.2)]'
-                : 'text-gray-400 hover:text-white'
-            }`}
-            onClick={() => setBracketMode('group')}
-          >
-            Vòng Bảng (Group Stage)
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              bracketMode === 'knockout'
-                ? 'bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.2)]'
-                : 'text-gray-400 hover:text-white'
-            }`}
-            onClick={() => setBracketMode('knockout')}
-          >
-            Vòng Loại Trực Tiếp (Knockout)
-          </button>
-        </div>
-      </div>
-
-      {bracketMode === 'group' ? (
-        /* GROUP STAGE VIEW - Renders all 12 groups in a responsive grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-[fadeIn_0.3s_ease]">
-          {groupsList.map(gName => {
-            const groupMatches = matches.filter(m => m.group === gName);
-            const groupStandings = getGroupStandings(groupMatches);
-
-            return (
-              <div 
-                key={gName} 
-                className="glass-panel border border-white/5 p-4 rounded-2xl bg-[#08130e]/40 flex flex-col justify-between space-y-4"
-              >
-                <div>
-                  {/* Group Header */}
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-3">
-                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                      📊 {gName}
-                    </h3>
-                    <span className="text-[9px] text-gray-500 italic">Bảng xếp hạng</span>
-                  </div>
-
-                  {/* Standings Table */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-white/10 text-gray-400 font-mono font-bold uppercase tracking-wider text-[10px] sm:text-xs">
-                          <th className="py-2.5 px-1.5 text-center w-6 sm:w-8">#</th>
-                          <th className="py-2.5 px-1.5">Đội</th>
-                          <th className="py-2.5 px-1.5 text-center w-8 sm:w-10" title="Số trận đã đấu">Tr</th>
-                          <th className="py-2.5 px-1.5 text-center w-8 sm:w-10" title="Hiệu số">HS</th>
-                          <th className="py-2.5 px-1.5 text-center w-10 sm:w-12 text-emerald-400" title="Điểm">Đ</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-xs sm:text-sm">
-                        {groupStandings.map((team, idx) => {
-                          let rowBg = 'border-white/5';
-                          let rankBg = 'bg-white/5 text-gray-400';
-                          if (idx < 2) {
-                            rowBg = 'border-emerald-500/10 bg-emerald-500/2';
-                            rankBg = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-                          } else if (idx === 2) {
-                            rowBg = 'border-blue-500/10 bg-blue-500/2';
-                            rankBg = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-                          } else {
-                            rowBg = 'border-red-500/5 opacity-70';
-                            rankBg = 'bg-red-500/10 text-red-400 border border-red-500/20';
-                          }
-
-                          return (
-                            <tr key={team.name} className={`border-b ${rowBg} hover:bg-white/5 transition-colors`}>
-                              <td className="py-2.5 px-1.5 text-center font-bold font-mono">
-                                <span className={`w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] sm:text-[10px] ${rankBg}`}>
-                                  {idx + 1}
-                                </span>
-                              </td>
-                              <td className="py-2.5 px-1.5 font-semibold text-white flex items-center gap-1.5 whitespace-nowrap">
-                                <span className="text-sm sm:text-base">{getCountryEmoji(team.name, onFlagClick)}</span>
-                                <span className="truncate max-w-[85px] sm:max-w-[120px]">{team.name}</span>
-                              </td>
-                              <td className="py-2.5 px-1.5 text-center font-bold font-mono text-gray-300">{team.played}</td>
-                              <td className={`py-2.5 px-1.5 text-center font-bold font-mono ${team.gd > 0 ? 'text-emerald-400' : team.gd < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                {team.gd > 0 ? `+${team.gd}` : team.gd}
-                              </td>
-                              <td className="py-2.5 px-1.5 text-center font-black font-mono text-emerald-400 text-xs sm:text-sm">{team.pts}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Group Matches */}
-                <div className="border-t border-white/5 pt-3">
-                  <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-2 pl-1">
-                    ⚽ Trận Đấu & Bình Chọn
-                  </h4>
-                  <div className="flex flex-col gap-2 group-stage-matches">
-                    {groupMatches.map(renderMatchNode)}
-                  </div>
+      {/* KNOCKOUT BRACKET VIEW */}
+      <>
+        {/* DESKTOP VIEW (hidden on mobile, block on md+) */}
+        <div className="hidden md:block overflow-x-auto pb-6 scrollbar-premium glass-panel border border-white/5 p-4 rounded-2xl bg-[#08130e]/40">
+          <div className="min-w-[1300px] flex items-center justify-between gap-6 py-4 relative">
+            
+            {/* LEFT SIDE BRACKET TREE */}
+            <div className="flex gap-6 items-stretch h-[820px] select-none">
+              {/* Round of 32 */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Vòng 32</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {leftR32.map(renderMatchNode)}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      ) : (
-        /* KNOCKOUT BRACKET VIEW */
-        <>
-          {/* DESKTOP VIEW (hidden on mobile, block on md+) */}
-          <div className="hidden md:block overflow-x-auto pb-6 scrollbar-premium glass-panel border border-white/5 p-4 rounded-2xl bg-[#08130e]/40">
-            <div className="min-w-[1300px] flex items-center justify-between gap-6 py-4 relative">
+
+              {/* Round of 16 */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Vòng 16</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {leftR16.map(renderMatchNode)}
+                </div>
+              </div>
+
+              {/* Quarter-finals */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Tứ Kết</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {leftQF.map(renderMatchNode)}
+                </div>
+              </div>
+
+              {/* Semi-final */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Bán Kết</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {leftSF.map(renderMatchNode)}
+                </div>
+              </div>
+            </div>
+
+            {/* CENTER PANEL (Finals, Trophy, Champion) */}
+            <div className="flex flex-col justify-center items-center w-[280px] gap-8 text-center h-[820px] shrink-0">
               
-              {/* LEFT SIDE BRACKET TREE */}
-              <div className="flex gap-6 items-stretch h-[820px] select-none">
-                {/* Round of 32 */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Vòng 32</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {leftR32.map(renderMatchNode)}
-                  </div>
+              {/* Glowing Champion box */}
+              <div className="glass-panel p-5 border border-amber-500/25 bg-amber-500/5 rounded-2xl w-full flex flex-col items-center gap-3 relative overflow-hidden shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08)_0%,transparent_75%)] pointer-events-none" />
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl shadow-inner">
+                  🏆
                 </div>
-
-                {/* Round of 16 */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Vòng 16</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {leftR16.map(renderMatchNode)}
-                  </div>
-                </div>
-
-                {/* Quarter-finals */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Tứ Kết</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {leftQF.map(renderMatchNode)}
-                  </div>
-                </div>
-
-                {/* Semi-final */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Bán Kết</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {leftSF.map(renderMatchNode)}
-                  </div>
+                <div className="text-center">
+                  <span className="text-[10px] text-amber-400 font-extrabold tracking-widest uppercase block">Nhà Vô Địch</span>
+                  {champion ? (
+                    <div className="text-lg font-black text-white flex items-center justify-center gap-1.5 mt-1 animate-pulse">
+                      {getCountryEmoji(champion, onFlagClick)} {champion}
+                    </div>
+                  ) : (
+                    <div className="text-xs font-semibold text-gray-500 italic mt-1">Chưa Xác Định</div>
+                  )}
                 </div>
               </div>
 
-              {/* CENTER PANEL (Finals, Trophy, Champion) */}
-              <div className="flex flex-col justify-center items-center w-[280px] gap-8 text-center h-[820px] shrink-0">
-                
-                {/* Glowing Champion box */}
-                <div className="glass-panel p-5 border border-amber-500/25 bg-amber-500/5 rounded-2xl w-full flex flex-col items-center gap-3 relative overflow-hidden shadow-[0_0_30px_rgba(245,158,11,0.05)]">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08)_0%,transparent_75%)] pointer-events-none" />
-                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl shadow-inner">
-                    🏆
-                  </div>
-                  <div className="text-center">
-                    <span className="text-[10px] text-amber-400 font-extrabold tracking-widest uppercase block">Nhà Vô Địch</span>
-                    {champion ? (
-                      <div className="text-lg font-black text-white flex items-center justify-center gap-1.5 mt-1 animate-pulse">
-                        {getCountryEmoji(champion, onFlagClick)} {champion}
-                      </div>
-                    ) : (
-                      <div className="text-xs font-semibold text-gray-500 italic mt-1">Chưa Xác Định</div>
-                    )}
-                  </div>
+              {/* Final Match Node */}
+              <div className="w-full">
+                <div className="bracket-round-header border-amber-500/10 text-amber-400">Chung Kết</div>
+                {finalMatch && renderMatchNode(finalMatch)}
+              </div>
+
+              {/* Third Place Match Node */}
+              <div className="w-full">
+                <div className="bracket-round-header">Tranh Hạng Ba</div>
+                {thirdPlaceMatch && renderMatchNode(thirdPlaceMatch)}
+              </div>
+
+            </div>
+
+            {/* RIGHT SIDE BRACKET TREE */}
+            <div className="flex gap-6 items-stretch h-[820px] select-none">
+              {/* Semi-final */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Bán Kết</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {rightSF.map(renderMatchNode)}
+                </div>
+              </div>
+
+              {/* Quarter-finals */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Tứ Kết</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {rightQF.map(renderMatchNode)}
+                </div>
+              </div>
+
+              {/* Round of 16 */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Vòng 16</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {rightR16.map(renderMatchNode)}
+                </div>
+              </div>
+
+              {/* Round of 32 */}
+              <div className="flex flex-col justify-around h-full">
+                <div className="bracket-round-header">Vòng 32</div>
+                <div className="flex-grow flex flex-col justify-around">
+                  {rightR32.map(renderMatchNode)}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* MOBILE VIEW (block on mobile, hidden on md+) */}
+        <div className="block md:hidden">
+          {/* Horizontal scroll subnav for rounds */}
+          <nav className="bracket-subnav">
+            <button 
+              type="button"
+              className={`bracket-subnav-btn ${activeMobileTab === 'r32' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('r32')}
+            >
+              Vòng 32
+            </button>
+            <button 
+              type="button"
+              className={`bracket-subnav-btn ${activeMobileTab === 'r16' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('r16')}
+            >
+              Vòng 16
+            </button>
+            <button 
+              type="button"
+              className={`bracket-subnav-btn ${activeMobileTab === 'qf' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('qf')}
+            >
+              Tứ Kết
+            </button>
+            <button 
+              type="button"
+              className={`bracket-subnav-btn ${activeMobileTab === 'sf' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('sf')}
+            >
+              Bán Kết
+            </button>
+            <button 
+              type="button"
+              className={`bracket-subnav-btn ${activeMobileTab === 'final' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('final')}
+            >
+              Chung Kết
+            </button>
+          </nav>
+
+          {/* Display filtered matches list for selected round */}
+          <div className="space-y-3 flex flex-col items-center">
+            {activeMobileTab === 'r32' && (
+              <>
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
+                {leftR32.map(renderMatchNode)}
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
+                {rightR32.map(renderMatchNode)}
+              </>
+            )}
+
+            {activeMobileTab === 'r16' && (
+              <>
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
+                {leftR16.map(renderMatchNode)}
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
+                {rightR16.map(renderMatchNode)}
+              </>
+            )}
+
+            {activeMobileTab === 'qf' && (
+              <>
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
+                {leftQF.map(renderMatchNode)}
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
+                {rightQF.map(renderMatchNode)}
+              </>
+            )}
+
+            {activeMobileTab === 'sf' && (
+              <>
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Trận 1 (Nhánh Trái):</div>
+                {leftSF.map(renderMatchNode)}
+                <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Trận 2 (Nhánh Phải):</div>
+                {rightSF.map(renderMatchNode)}
+              </>
+            )}
+
+            {activeMobileTab === 'final' && (
+              <div className="space-y-4 w-full flex flex-col items-center">
+                {/* Mobile Champion Card */}
+                <div className="glass-panel p-4 border border-amber-500/25 bg-amber-500/5 rounded-2xl w-full max-w-[220px] flex flex-col items-center gap-2 shadow-inner">
+                  <span className="text-[9px] text-amber-400 font-extrabold tracking-widest uppercase">Nhà Vô Địch 🏆</span>
+                  {champion ? (
+                    <div className="text-sm font-black text-white flex items-center gap-1 mt-0.5">
+                      {getCountryEmoji(champion, onFlagClick)} {champion}
+                    </div>
+                  ) : (
+                    <div className="text-xs font-semibold text-gray-500 italic">Chưa Xác Định</div>
+                  )}
                 </div>
 
-                {/* Final Match Node */}
-                <div className="w-full">
-                  <div className="bracket-round-header border-amber-500/10 text-amber-400">Chung Kết</div>
+                <div className="w-full flex flex-col items-center gap-3">
+                  <div className="text-[10px] text-amber-400 font-extrabold uppercase self-start pl-2">Chung Kết:</div>
                   {finalMatch && renderMatchNode(finalMatch)}
-                </div>
 
-                {/* Third Place Match Node */}
-                <div className="w-full">
-                  <div className="bracket-round-header">Tranh Hạng Ba</div>
+                  <div className="text-[10px] text-gray-500 font-extrabold uppercase self-start pl-2 mt-2">Tranh Hạng Ba:</div>
                   {thirdPlaceMatch && renderMatchNode(thirdPlaceMatch)}
                 </div>
-
               </div>
-
-              {/* RIGHT SIDE BRACKET TREE */}
-              <div className="flex gap-6 items-stretch h-[820px] select-none">
-                {/* Semi-final */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Bán Kết</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {rightSF.map(renderMatchNode)}
-                  </div>
-                </div>
-
-                {/* Quarter-finals */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Tứ Kết</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {rightQF.map(renderMatchNode)}
-                  </div>
-                </div>
-
-                {/* Round of 16 */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Vòng 16</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {rightR16.map(renderMatchNode)}
-                  </div>
-                </div>
-
-                {/* Round of 32 */}
-                <div className="flex flex-col justify-around h-full">
-                  <div className="bracket-round-header">Vòng 32</div>
-                  <div className="flex-grow flex flex-col justify-around">
-                    {rightR32.map(renderMatchNode)}
-                  </div>
-                </div>
-              </div>
-
-            </div>
+            )}
           </div>
-
-          {/* MOBILE VIEW (block on mobile, hidden on md+) */}
-          <div className="block md:hidden">
-            {/* Horizontal scroll subnav for rounds */}
-            <nav className="bracket-subnav">
-              <button 
-                type="button"
-                className={`bracket-subnav-btn ${activeMobileTab === 'r32' ? 'active' : ''}`}
-                onClick={() => setActiveMobileTab('r32')}
-              >
-                Vòng 32
-              </button>
-              <button 
-                type="button"
-                className={`bracket-subnav-btn ${activeMobileTab === 'r16' ? 'active' : ''}`}
-                onClick={() => setActiveMobileTab('r16')}
-              >
-                Vòng 16
-              </button>
-              <button 
-                type="button"
-                className={`bracket-subnav-btn ${activeMobileTab === 'qf' ? 'active' : ''}`}
-                onClick={() => setActiveMobileTab('qf')}
-              >
-                Tứ Kết
-              </button>
-              <button 
-                type="button"
-                className={`bracket-subnav-btn ${activeMobileTab === 'sf' ? 'active' : ''}`}
-                onClick={() => setActiveMobileTab('sf')}
-              >
-                Bán Kết
-              </button>
-              <button 
-                type="button"
-                className={`bracket-subnav-btn ${activeMobileTab === 'final' ? 'active' : ''}`}
-                onClick={() => setActiveMobileTab('final')}
-              >
-                Chung Kết
-              </button>
-            </nav>
-
-            {/* Display filtered matches list for selected round */}
-            <div className="space-y-3 flex flex-col items-center">
-              {activeMobileTab === 'r32' && (
-                <>
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
-                  {leftR32.map(renderMatchNode)}
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
-                  {rightR32.map(renderMatchNode)}
-                </>
-              )}
-
-              {activeMobileTab === 'r16' && (
-                <>
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
-                  {leftR16.map(renderMatchNode)}
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
-                  {rightR16.map(renderMatchNode)}
-                </>
-              )}
-
-              {activeMobileTab === 'qf' && (
-                <>
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Nhánh Trái:</div>
-                  {leftQF.map(renderMatchNode)}
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Nhánh Phải:</div>
-                  {rightQF.map(renderMatchNode)}
-                </>
-              )}
-
-              {activeMobileTab === 'sf' && (
-                <>
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mb-1.5 self-start">Trận 1 (Nhánh Trái):</div>
-                  {leftSF.map(renderMatchNode)}
-                  <div className="text-[10px] text-gray-500 font-extrabold uppercase mt-3 mb-1.5 self-start">Trận 2 (Nhánh Phải):</div>
-                  {rightSF.map(renderMatchNode)}
-                </>
-              )}
-
-              {activeMobileTab === 'final' && (
-                <div className="space-y-4 w-full flex flex-col items-center">
-                  {/* Mobile Champion Card */}
-                  <div className="glass-panel p-4 border border-amber-500/25 bg-amber-500/5 rounded-2xl w-full max-w-[220px] flex flex-col items-center gap-2 shadow-inner">
-                    <span className="text-[9px] text-amber-400 font-extrabold tracking-widest uppercase">Nhà Vô Địch 🏆</span>
-                    {champion ? (
-                      <div className="text-sm font-black text-white flex items-center gap-1 mt-0.5">
-                        {getCountryEmoji(champion, onFlagClick)} {champion}
-                      </div>
-                    ) : (
-                      <div className="text-xs font-semibold text-gray-500 italic">Chưa Xác Định</div>
-                    )}
-                  </div>
-
-                  <div className="w-full flex flex-col items-center gap-3">
-                    <div className="text-[10px] text-amber-400 font-extrabold uppercase self-start pl-2">Chung Kết:</div>
-                    {finalMatch && renderMatchNode(finalMatch)}
-
-                    <div className="text-[10px] text-gray-500 font-extrabold uppercase self-start pl-2 mt-2">Tranh Hạng Ba:</div>
-                    {thirdPlaceMatch && renderMatchNode(thirdPlaceMatch)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+        </div>
+      </>
 
       {/* QUICK PREDICTION MODAL */}
       {selectedMatch && (
@@ -808,32 +715,44 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
                 // Active prediction form
                 return (
                   <form onSubmit={handleSavePrediction} className="space-y-4">
-                    <div className="flex items-center justify-center gap-4 bg-black/20 p-4 rounded-xl border border-white/5">
-                      <div className="text-center flex flex-col items-center">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase mb-1">{getFriendlyTeamName(selectedMatch.teamHome)}</span>
-                        <input
-                          type="number"
-                          min="0"
-                          className="score-type-input text-center w-14 font-mono text-base font-bold bg-black/40 border border-white/10 rounded-lg p-2 text-white outline-none focus:border-emerald-500"
-                          placeholder="0"
-                          value={predHome}
-                          onChange={(e) => setPredHome(e.target.value)}
-                          required
-                        />
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-center gap-4 bg-black/20 p-4 rounded-xl border border-white/5">
+                        <div className="text-center flex flex-col items-center">
+                          <span className="text-[10px] text-gray-500 font-bold uppercase mb-1">{getFriendlyTeamName(selectedMatch.teamHome)}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            className="score-type-input text-center w-14 font-mono text-base font-bold bg-black/40 border border-white/10 rounded-lg p-2 text-white outline-none focus:border-emerald-500"
+                            placeholder="0"
+                            value={predHome}
+                            onChange={(e) => setPredHome(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <span className="text-gray-500 font-extrabold text-lg mt-4">:</span>
+                        <div className="text-center flex flex-col items-center">
+                          <span className="text-[10px] text-gray-500 font-bold uppercase mb-1">{getFriendlyTeamName(selectedMatch.teamAway)}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            className="score-type-input text-center w-14 font-mono text-base font-bold bg-black/40 border border-white/10 rounded-lg p-2 text-white outline-none focus:border-emerald-500"
+                            placeholder="0"
+                            value={predAway}
+                            onChange={(e) => setPredAway(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
-                      <span className="text-gray-500 font-extrabold text-lg mt-4">:</span>
-                      <div className="text-center flex flex-col items-center">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase mb-1">{getFriendlyTeamName(selectedMatch.teamAway)}</span>
-                        <input
-                          type="number"
-                          min="0"
-                          className="score-type-input text-center w-14 font-mono text-base font-bold bg-black/40 border border-white/10 rounded-lg p-2 text-white outline-none focus:border-emerald-500"
-                          placeholder="0"
-                          value={predAway}
-                          onChange={(e) => setPredAway(e.target.value)}
-                          required
-                        />
-                      </div>
+
+                      {!isPlaceholder(selectedMatch.teamHome) && !isPlaceholder(selectedMatch.teamAway) && (
+                        <button
+                          type="button"
+                          className="ai-predict-btn"
+                          onClick={() => setShowAiModal(true)}
+                        >
+                          🧠 Xem AI Gợi Ý & Phân Tích
+                        </button>
+                      )}
                     </div>
 
                     <div className="flex gap-2">
@@ -908,16 +827,6 @@ export default function TournamentBracket({ matches, onSavePrediction, onFlagCli
                           </>
                         )}
                       </div>
-                    )}
-
-                    {!isPlaceholder(selectedMatch.teamHome) && !isPlaceholder(selectedMatch.teamAway) && (
-                      <button
-                        type="button"
-                        className="btn btn-secondary text-xs px-2.5 py-1.5 flex items-center gap-1 w-full justify-center text-emerald-400 hover:text-emerald-300 border-emerald-500/10 hover:border-emerald-500/30 font-semibold"
-                        onClick={() => setShowAiModal(true)}
-                      >
-                        🧠 AI Dự Đoán
-                      </button>
                     )}
                   </form>
                 );

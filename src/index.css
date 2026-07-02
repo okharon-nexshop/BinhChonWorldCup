@@ -1174,3 +1174,35 @@ svg circle {
 svg circle:hover {
   cursor: pointer;
 }
+
+/* AI Predict Button - Premium Styling */
+.ai-predict-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 229, 255, 0.1) 100%);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  color: var(--color-green);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.ai-predict-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 229, 255, 0.2) 100%);
+  border-color: rgba(0, 255, 136, 0.45);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.12);
+}
+
+.ai-predict-btn:active {
+  transform: translateY(0);
+  scale: 0.98;
+}
